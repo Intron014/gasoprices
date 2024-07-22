@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Stations in Spain</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .search-menu {
+            display: none;
+            margin-bottom: 20px;
+        }
+        .search-menu input {
+            margin-right: 10px;
+        }
+    </style>
+    <script>
+        async function fetchStations() {
+            const response = await fetch('/fuel_stations');
+            const data = await response.json();
+            displayStations(data.ListaEESSPrecio);
+        }
+
+        function displayStations(stations) {
+            const tableBody = document.getElementById('stations-table-body');
+            tableBody.innerHTML = '';
+
+            const headers = [
+                "C.P.", "Dirección", "Horario", "Latitud", "Localidad", "Longitud (WGS84)", "Margen",
+                "Municipio", "Precio Gasoleo A", "Precio Gasoleo Premium", "Precio Gasolina 95 E5",
+                "Precio Gasolina 98 E5", "Provincia", "Remisión", "Rótulo", "Tipo Venta"
+            ];
+
+            stations.forEach(station => {
+                const row = document.createElement('tr');
+                headers.forEach(header => {
+                    const cell = document.createElement('td');
+                    cell.textContent = station[header] || '';
+                    row.appendChild(cell);
+                });
+                tableBody.appendChild(row);
+            });
+        }
+
+        function toggleSearchMenu() {
+            const menu = document.getElementById('search-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function searchStations(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const params = new URLSearchParams(formData).toString();
+            const response = await fetch(`/fuel_stations/filter?${params}`);
+            const data = await response.json();
+            displayStations(data);
+        }
+
+        window.onload = function() {
+            fetchStations();
+        };
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Fuel Stations in Spain</h1>
+    <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
+    <div id="search-menu" class="search-menu">
+        <form onsubmit="searchStations(event)">
+            <input type="text" name="Municipio" placeholder="Municipio">
+            <input type="text" name="Provincia" placeholder="Provincia">
+            <input type="text" name="Rótulo" placeholder="Rótulo">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>C.P.</th>
+            <th>Dirección</th>
+            <th>Horario</th>
+            <th>Latitud</th>
+            <th>Localidad</th>
+            <th>Longitud (WGS84)</th>
+            <th>Margen</th>
+            <th>Municipio</th>
+            <th>Precio Gasoleo A</th>
+            <th>Precio Gasoleo Premium</th>
+            <th>Precio Gasolina 95 E5</th>
+            <th>Precio Gasolina 98 E5</th>
+            <th>Provincia</th>
+            <th>Remisión</th>
+            <th>Rótulo</th>
+            <th>Tipo Venta</th>
+        </tr>
+        </thead>
+        <tbody id="stations-table-body">
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
