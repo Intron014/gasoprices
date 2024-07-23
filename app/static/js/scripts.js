@@ -105,9 +105,13 @@ function displayStations(stations) {
         const row = document.createElement('tr');
         visibleColumns.forEach(columnKey => {
             const cell = document.createElement('td');
-            if (columnKey.startsWith('Precio') && station[columnKey]) {
+            if (columnKey.startsWith('Precio')) {
                 cell.classList.add('seven-segment');
-                cell.textContent = station[columnKey];
+                if(station[columnKey]===""){
+                    cell.textContent = "-";
+                } else {
+                    cell.textContent = station[columnKey];
+                }
             } else if (columnKey === 'Horario') {
                 const { status, formattedTimetable } = getStatusAndTimetable(station[columnKey]);
                 console.log(`Station ${index} status:`, status, 'Timetable:', formattedTimetable);
