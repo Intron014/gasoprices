@@ -19,6 +19,8 @@ const columns = [
 ];
 
 let visibleColumns = columns.filter(col => col.default).map(col => col.key);
+let currentStations = [];
+let sortOrder = {};
 
 function toggleColumnMenu() {
     const menu = document.getElementById('column-menu');
@@ -47,8 +49,6 @@ function updateVisibleColumns() {
         .map(cb => cb.value);
     displayStations(currentStations);
 }
-
-let currentStations = [];
 
 function showSpinner() {
     document.getElementById('loading-spinner').style.display = 'flex';
@@ -89,6 +89,13 @@ function displayStations(stations) {
     visibleColumns.forEach(columnKey => {
         const th = document.createElement('th');
         th.textContent = columns.find(col => col.key === columnKey).display;
+        if (columnKey.startsWith('Precio')) {
+            th.classList.add('sortable');
+            th.addEventListener('click', () => {
+                sortOrder[columnKey] = !sortOrder[columnKey];
+                sortStationsByPrice(currentStations, columnKey, sortOrder[columnKey]);
+            });
+        }
         headerRow.appendChild(th);
     });
     tableHead.appendChild(headerRow);
@@ -126,6 +133,7 @@ function displayStations(stations) {
         });
         tableBody.appendChild(row);
     });
+    updateSortIndicators();
 }
 
 function getStatusAndTimetable(horario) {
@@ -152,7 +160,6 @@ function getStatusAndTimetable(horario) {
             const openTime = parseInt(startHour) * 100 + parseInt(startMin);
             const closeTime = parseInt(endHour) * 100 + parseInt(endMinute);
             console.log('Checking schedule:', startDay, endDay, openTime, closeTime, currentDay, time)
-
 
             const isDayInRange = (startDay === 'L' && endDay === 'D') ||
                 (days.indexOf(currentDay) >= days.indexOf(startDay) &&
@@ -203,23 +210,32 @@ function showTimetable(cell, timetable) {
     if (timetableRect.right > window.innerWidth) {
         timetableElement.style.left = `${window.innerWidth - timetableRect.width - 10}px`;
     }
-    if (timetableRect.bottom > window.innerHeight) {
-        timetableElement.style.top = `${rect.top - timetableRect.height}px`;
-    }
 
-    document.addEventListener('click', removeTimetable);
+    document.addEventListener('click', (event) => {
+        console.log('Document clicked:', event.target);
+        if (!timetableElement.contains(event.target) && event.target !== cell) {
+            timetableElement.remove();
+            console.log('Timetable element removed');
+        }
+    }, { once: true });
 }
 
-function removeTimetable(event) {
-    console.log('Attempting to remove timetable');
-    const timetable = document.querySelector('.timetable');
-    if (timetable && !event.target.closest('.status')) {
-        timetable.remove();
-        console.log('Timetable removed');
-        document.removeEventListener('click', removeTimetable);
+function updateSortIndicators() {
+    const headers = document.querySelectorAll('.sortable');
+    headers.forEach(header => {
+        header.classList.remove('sorted-asc', 'sorted-desc');
+        header.classList.remove('sorted');
+    });
+
+    const sortedColumn = Object.keys(sortOrder).find(key => sortOrder[key] !== undefined);
+    if (sortedColumn) {
+        const header = Array.from(headers).find(header => header.textContent === columns.find(col => col.key === sortedColumn).display);
+        if (header) {
+            header.classList.add(sortOrder[sortedColumn] ? 'sorted-asc' : 'sorted-desc');
+            header.classList.add('sorted');
+        }
     }
 }
-
 
 function toggleSearchMenu() {
     const menu = document.getElementById('search-menu');
@@ -246,17 +262,17 @@ function getDistance(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.asin(Math.sqrt(a));
 }
 
-function sortStationsByPrice(stations, priceType) {
-    return stations.sort((a, b) => {
+function sortStationsByPrice(stations, priceType, asc) {
+    stations.sort((a, b) => {
         const priceA = parseFloat(a[priceType].replace(',', '.'));
         const priceB = parseFloat(b[priceType].replace(',', '.'));
-        return priceA - priceB;
+        return asc ? priceA - priceB : priceB - priceA;
     });
+    displayStations(stations);
 }
 
-
 async function filterStationsByDistance(maxDistance) {
-    showSpinner()
+    showSpinner();
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
@@ -268,16 +284,16 @@ async function filterStationsByDistance(maxDistance) {
                 const distance = getDistance(latitude, longitude, stationLat, stationLon);
                 return { ...station, distance };
             }).filter(station => station.distance <= maxDistance);
-            hideSpinner()
+            hideSpinner();
             displayStations(stations.sort((a, b) => a.distance - b.distance));
         }, (error) => {
             console.error("Error getting location:", error);
-            hideSpinner()
+            hideSpinner();
             alert("Unable to get your location. Please check your browser settings.");
             fetchStations();
         });
     } else {
-        hideSpinner()
+        hideSpinner();
         alert('Geolocation is not supported by this browser.');
         fetchStations();
     }
@@ -308,23 +324,6 @@ function initializeDistanceFilter() {
         fetchStations();
     }
 }
-
-function sortResults(event, priceType) {
-    event.preventDefault();
-    const tableBody = document.getElementById('stations-table-body');
-    const stations = Array.from(tableBody.getElementsByTagName('tr')).map(row => {
-        const cells = row.getElementsByTagName('td');
-        const station = {};
-        for (let i = 0; i < cells.length; i++) {
-            station[tableBody.parentNode.rows[0].cells[i].textContent] = cells[i].textContent;
-        }
-        return station;
-    });
-    const sortedStations = sortStationsByPrice(stations, priceType);
-    displayStations(sortedStations);
-}
-
-
 
 window.onload = function() {
     initializeDistanceFilter();

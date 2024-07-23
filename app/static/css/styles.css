@@ -189,6 +189,21 @@ tr:hover {
     margin-left: 0.5rem;
 }
 
+.sortable {
+    cursor: pointer;
+}
+
+.sorted-asc::after {
+    content: " ▲";
+}
+
+.sorted-desc::after {
+    content: " ▼";
+}
+
+.sorted {
+}
+
 
 @media (max-width: 768px) {
     .container {
