@@ -4,116 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fuel Stations in Spain</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .search-menu {
-            display: none;
-            margin-bottom: 20px;
-        }
-        .search-menu input {
-            margin-right: 10px;
-        }
-    </style>
-    <script>
-        async function fetchStations() {
-            const response = await fetch('/fuel_stations');
-            const data = await response.json();
-            displayStations(data.ListaEESSPrecio);
-        }
-
-        function displayStations(stations) {
-            const tableBody = document.getElementById('stations-table-body');
-            tableBody.innerHTML = '';
-
-            const headers = [
-                "C.P.", "Dirección", "Horario", "Latitud", "Localidad", "Longitud (WGS84)", "Margen",
-                "Municipio", "Precio Gasoleo A", "Precio Gasoleo Premium", "Precio Gasolina 95 E5",
-                "Precio Gasolina 98 E5", "Provincia", "Remisión", "Rótulo", "Tipo Venta"
-            ];
-
-            stations.forEach(station => {
-                const row = document.createElement('tr');
-                headers.forEach(header => {
-                    const cell = document.createElement('td');
-                    cell.textContent = station[header] || '';
-                    row.appendChild(cell);
-                });
-                tableBody.appendChild(row);
-            });
-        }
-
-        function toggleSearchMenu() {
-            const menu = document.getElementById('search-menu');
-            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
-
-        async function searchStations(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const params = new URLSearchParams(formData).toString();
-            const response = await fetch(`/fuel_stations/filter?${params}`);
-            const data = await response.json();
-            displayStations(data);
-        }
-
-        window.onload = function() {
-            fetchStations();
-        };
-    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </head>
 <body>
 <div class="container">
-    <h1>Fuel Stations in Spain</h1>
-    <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
-    <div id="search-menu" class="search-menu">
+    <h1>GasoPrices</h1>
+    <div class="control-panel">
+        <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
+        <button onclick="toggleColumnMenu()">Select Columns</button>
+    </div>
+    <div id="search-menu" class="search-menu" style="display: none;">
         <form onsubmit="searchStations(event)">
             <input type="text" name="Municipio" placeholder="Municipio">
             <input type="text" name="Provincia" placeholder="Provincia">
             <input type="text" name="Rótulo" placeholder="Rótulo">
+            <div id="distance-filter">
+                <input type="number" id="distance-input" value="4" min="1" step="0.1" placeholder="Max distance (km)">
+                <button id="filter-by-distance">Filter by Distance</button>
+            </div>
             <button type="submit">Search</button>
         </form>
     </div>
-    <table>
-        <thead>
-        <tr>
-            <th>C.P.</th>
-            <th>Dirección</th>
-            <th>Horario</th>
-            <th>Latitud</th>
-            <th>Localidad</th>
-            <th>Longitud (WGS84)</th>
-            <th>Margen</th>
-            <th>Municipio</th>
-            <th>Precio Gasoleo A</th>
-            <th>Precio Gasoleo Premium</th>
-            <th>Precio Gasolina 95 E5</th>
-            <th>Precio Gasolina 98 E5</th>
-            <th>Provincia</th>
-            <th>Remisión</th>
-            <th>Rótulo</th>
-            <th>Tipo Venta</th>
-        </tr>
-        </thead>
-        <tbody id="stations-table-body">
-        </tbody>
+
+    <div id="column-menu" class="column-menu" style="display: none;">
+        <!-- Column checkboxes will be dynamically added here -->
+    </div>
+
+    <div id="loading-spinner" class="spinner-container" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading gas stations...</p>
+    </div>
+
+    <style>
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <table id="stations-table">
+        <thead id="stations-table-head"></thead>
+        <tbody id="stations-table-body"></tbody>
     </table>
 </div>
 </body>
