@@ -63,6 +63,7 @@ async function fetchStations() {
     try {
         const response = await fetch('/fuel_stations');
         const data = await response.json();
+        update_date(data.Fecha);
         hideSpinner();
         displayStations(data.ListaEESSPrecio);
     } catch (error) {
@@ -91,6 +92,15 @@ function displayStations(stations) {
         th.textContent = columns.find(col => col.key === columnKey).display;
         if (columnKey.startsWith('Precio')) {
             th.classList.add('sortable');
+            if(columnKey === 'Precio Gasoleo A'){
+                th.classList.add('fuel-diesel');
+            } else if(columnKey === 'Precio Gasoleo Premium'){
+                th.classList.add('fuel-diesel-plus');
+            } else if(columnKey === 'Precio Gasolina 95 E5'){
+                th.classList.add('fuel-sp-95');
+            } else if(columnKey === 'Precio Gasolina 98 E5'){
+                th.classList.add('fuel-sp-98');
+            }
             th.addEventListener('click', () => {
                 sortOrder[columnKey] = !sortOrder[columnKey];
                 sortStationsByPrice(currentStations, columnKey, sortOrder[columnKey]);
@@ -282,6 +292,7 @@ async function filterStationsByDistance(maxDistance) {
             const { latitude, longitude } = position.coords;
             const response = await fetch('/fuel_stations');
             const data = await response.json();
+            update_date(data.Fecha);
             const stations = data.ListaEESSPrecio.map(station => {
                 const stationLat = parseFloat(station.Latitud.replace(',', '.'));
                 const stationLon = parseFloat(station["Longitud (WGS84)"].replace(',', '.'));
@@ -327,6 +338,10 @@ function initializeDistanceFilter() {
         console.error('Distance filter elements not found');
         fetchStations();
     }
+}
+
+function update_date(date) {
+    document.getElementById('update-date').textContent = "Latest update:\n" + date;
 }
 
 window.onload = function() {

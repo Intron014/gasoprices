@@ -26,6 +26,27 @@ body {
     padding: 0;
 }
 
+a {
+    text-decoration: none;
+    color: #FCF7F8;
+}
+
+a:visited {
+    color: #FCF7F8;
+}
+
+.update-indicator {
+    position: sticky;
+    bottom: 0px;
+    text-align: center;
+    right: 10px;
+    background-color: var(--button-bg);
+    color: var(--button-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
 .container {
     width: 95%;
     max-width: 1200px;
@@ -40,6 +61,12 @@ h1 {
     color: var(--secondary-color);
     text-align: center;
     margin-bottom: 1.5rem;
+}
+
+p {
+    color: var(--secondary-color);
+    text-align: center;
+    margin-bottom: 1rem;
 }
 
 button {
@@ -104,6 +131,22 @@ tr:hover {
     font-family: 'Digital-7', monospace;
     font-size: 1.2em;
     color: #e74c3c;
+}
+
+.fuel-diesel {
+    color: #f39c12;
+}
+
+.fuel-diesel-plus {
+    color: #3498db;
+}
+
+.fuel-sp-98 {
+    color: #2ecc71;
+}
+
+.fuel-sp-95 {
+    color: #2ecc50;
 }
 
 .highlight {
