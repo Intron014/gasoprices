@@ -247,6 +247,45 @@ tr:hover {
 .sorted {
 }
 
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+.lowest-price {
+    color: #2ecc71 !important;
+    font-weight: bold;
+}
+
+.highest-price {
+    color: #e67e22 !important;
+    font-weight: bold;
+}
 
 @media (max-width: 768px) {
     .container {
