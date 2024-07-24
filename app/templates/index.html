@@ -8,69 +8,68 @@
     <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
 </head>
 <body>
-<div class="container">
-    <h1>GasoPrices</h1>
-    <div class="control-panel">
-        <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
-        <button onclick="toggleColumnMenu()">Select Columns</button>
+    <div class="container">
+        <h1>GasoPrice</h1>
+        <p>Find the cheapest gas stations in Spain</p>
+        <div class="control-panel">
+            <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
+            <button onclick="toggleColumnMenu()">Select Columns</button>
+        </div>
+        <div id="search-menu" class="search-menu" style="display: none;">
+            <form onsubmit="searchStations(event)">
+                <!-- <input type="text" name="Municipio" placeholder="Municipio">
+                <input type="text" name="Provincia" placeholder="Provincia">
+                <input type="text" name="Rótulo" placeholder="Rótulo"> -->
+                <div id="distance-filter">
+                    <input type="number" id="distance-input" value="4" min="1" step="0.1" placeholder="Max distance (km)">
+                    <button id="filter-by-distance">Filter by Distance</button>
+                </div>
+                <!-- <button type="submit">Search</button> -->
+            </form>
+        </div>
+        <div id="column-menu" class="column-menu" style="display: none;"></div>
+
+        <div id="loading-spinner" class="spinner-container" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading gas stations...</p>
+        </div>
+
+        <style>
+            .spinner-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(255, 255, 255, 0.8);
+                z-index: 1000;
+            }
+
+            .spinner {
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+        <table id="stations-table">
+            <thead id="stations-table-head"></thead>
+            <tbody id="stations-table-body"></tbody>
+        </table>
     </div>
-    <div id="search-menu" class="search-menu" style="display: none;">
-        <form onsubmit="searchStations(event)">
-            <!-- <input type="text" name="Municipio" placeholder="Municipio">
-            <input type="text" name="Provincia" placeholder="Provincia">
-            <input type="text" name="Rótulo" placeholder="Rótulo"> -->
-            <div id="distance-filter">
-                <input type="number" id="distance-input" value="4" min="1" step="0.1" placeholder="Max distance (km)">
-                <button id="filter-by-distance">Filter by Distance</button>
-            </div>
-            <!-- <button type="submit">Search</button> -->
-        </form>
-    </div>
 
-    <div id="column-menu" class="column-menu" style="display: none;">
-
-    </div>
-
-    <div id="loading-spinner" class="spinner-container" style="display: none;">
-        <div class="spinner"></div>
-        <p>Loading gas stations...</p>
-    </div>
-
-    <style>
-        .spinner-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.8);
-            z-index: 1000;
-        }
-
-        .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-
-    <table id="stations-table">
-        <thead id="stations-table-head"></thead>
-        <tbody id="stations-table-body"></tbody>
-    </table>
-</div>
+    {% include 'latest_up.html' %}
 </body>
 </html>
