@@ -13,6 +13,7 @@
         <p>Find the cheapest gas stations in Spain</p>
         <div class="control-panel">
             <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
+            <button id="dark-mode-toggle">DM</button>
             <button onclick="toggleColumnMenu()">Select Columns</button>
         </div>
         <div id="search-menu" class="search-menu" style="display: none;">
@@ -41,5 +42,18 @@
     </div>
 
     {% include 'latest_up.html' %}
+    <script>
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const body = document.body;
+
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+        });
+
+        if (localStorage.getItem('darkMode') === 'true') {
+            body.classList.add('dark-mode');
+        }
+    </script>
 </body>
 </html>

@@ -69,6 +69,10 @@ p {
     margin-bottom: 1rem;
 }
 
+#dark-mode-toggle {
+    margin-right: auto;
+}
+
 button {
     background-color: var(--button-bg);
     color: var(--button-color);
@@ -306,4 +310,93 @@ tr:hover {
     th, td {
         padding: 0.5rem;
     }
+}
+
+/* DARL MODE */
+
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+}
+
+body.dark-mode .container {
+    background-color: #2a2a2a;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode h1,
+body.dark-mode p {
+    color: #f0f0f0;
+}
+
+body.dark-mode button {
+    background-color: #4a4a4a;
+    color: #f0f0f0;
+}
+
+body.dark-mode button:hover {
+    background-color: #5a5a5a;
+}
+
+body.dark-mode .search-menu {
+    background-color: #3a3a3a;
+}
+
+body.dark-mode th {
+    background-color: #4a4a4a;
+    color: #f0f0f0;
+}
+
+body.dark-mode tr:nth-child(even) {
+    background-color: #2a2a2a;
+}
+
+body.dark-mode tr:hover {
+    background-color: #3a3a3a;
+}
+
+body.dark-mode .seven-segment {
+    color: #ff6b6b;
+}
+
+body.dark-mode .fuel-diesel {
+    color: #feca57;
+}
+
+body.dark-mode .fuel-diesel-plus {
+    color: #54a0ff;
+}
+
+body.dark-mode .fuel-sp-98 {
+    color: #5cd85a;
+}
+
+body.dark-mode .fuel-sp-95 {
+    color: #5cd85a;
+}
+
+body.dark-mode .highlight {
+    background-color: #2d3436;
+}
+
+body.dark-mode .status-open {
+    color: #55efc4;
+}
+
+body.dark-mode .status-closed {
+    color: #ff7675;
+}
+
+body.dark-mode .column-menu {
+    background-color: #2a2a2a;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode .column-menu label:hover {
+    background-color: #3a3a3a;
+}
+
+body.dark-mode .hoverable::after {
+    background-color: #4a4a4a;
+    color: #f0f0f0;
 }
