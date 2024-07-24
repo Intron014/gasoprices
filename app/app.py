@@ -1,7 +1,12 @@
 from flask import Flask, jsonify, request, render_template
 import requests
+import logging
 
 app = Flask(__name__)
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 @app.route('/fuel_stations', methods=['GET'])
 def get_fuel_stations():

@@ -1,0 +1,10 @@
+name: gasoprice
+services:
+  cdw:
+    build:
+      context: app
+    restart: unless-stopped
+    container_name: gasoprice
+    command: gunicorn app:app --bind 0.0.0.0:8006 --reload
+    ports:
+      - "8006:8006"
