@@ -111,6 +111,19 @@ function initializeColumnMenu() {
     mapEmbedsLabel.appendChild(document.createTextNode('Enable Map Embeds'));
     menu.appendChild(mapEmbedsLabel);
 
+    // OpenClose
+    const openCloseLabel = document.createElement('label');
+    const openCloseCheckbox = document.createElement('input');
+    openCloseCheckbox.type = 'checkbox';
+    openCloseCheckbox.checked = true;
+    openCloseLabel.appendChild(openCloseCheckbox);
+    openCloseLabel.appendChild(document.createTextNode('Show only Open Stations'));
+    menu.appendChild(openCloseLabel);
+
+    const columnsLabel = document.createElement('label');
+    columnsLabel.textContent = 'Columns';
+    menu.appendChild(columnsLabel);
+    menu.appendChild(hrb);
 
     // Columns
     columns.forEach(column => {
