@@ -140,12 +140,34 @@ function initializeColumnMenu() {
 }
 
 function updateVisibleColumns() {
+    console.log("Updating visible columns...");
     const checkboxes = document.querySelectorAll('#column-menu input[type="checkbox"]');
+    console.log("Found checkboxes:", checkboxes.length);
+
     visibleColumns = Array.from(checkboxes)
-        .filter(cb => cb.checked)
+        .filter(cb => cb.checked && cb.value !== 'undefined')
         .map(cb => cb.value);
-    displayStations(currentStations);
+
+    console.log("Visible columns after filter:", visibleColumns);
+
+    // Ensure at least one column is always visible
+    if (visibleColumns.length === 0) {
+        visibleColumns = ['Rótulo']; // Default to showing at least the "Marca" column
+        const rotuloCB = Array.from(checkboxes).find(cb => cb.value === 'Rótulo');
+        if (rotuloCB) rotuloCB.checked = true;
+        console.log("No columns selected, defaulting to 'Rótulo'");
+    }
+
+    console.log("Final visible columns:", visibleColumns);
+
+    if (currentStations && currentStations.length > 0) {
+        console.log("Displaying stations...");
+        displayStations(currentStations);
+    } else {
+        console.error("No stations to display");
+    }
 }
+
 
 function showSpinner() {
     document.getElementById('loading-spinner').style.display = 'flex';
@@ -171,11 +193,13 @@ async function fetchStations() {
 }
 
 function displayStations(stations) {
+    console.log("Displaying stations:", stations.length);
     currentStations = stations; // Update current stations
     updatePriceStats(stations);
-    console.log('Displaying stations:', stations);
+
     const tableHead = document.getElementById('stations-table-head');
     const tableBody = document.getElementById('stations-table-body');
+
     if (!tableHead || !tableBody) {
         console.error('Table head or body not found');
         return;
@@ -186,28 +210,32 @@ function displayStations(stations) {
     // Create table header
     const headerRow = document.createElement('tr');
     visibleColumns.forEach(columnKey => {
-        const th = document.createElement('th');
         const column = columns.find(col => col.key === columnKey);
-        th.textContent = column.display;
-        if (columnKey.startsWith('Precio')) {
-            th.classList.add('sortable');
-            if(columnKey === 'Precio Gasoleo A'){
-                th.classList.add('fuel-diesel');
-            } else if(columnKey === 'Precio Gasoleo Premium'){
-                th.classList.add('fuel-diesel-plus');
-            } else if(columnKey === 'Precio Gasolina 95 E5'){
-                th.classList.add('fuel-sp-95');
-            } else if(columnKey === 'Precio Gasolina 98 E5'){
-                th.classList.add('fuel-sp-98');
+        if(column) {
+            const th = document.createElement('th');
+            th.textContent = column.display;
+            if (columnKey.startsWith('Precio')) {
+                th.classList.add('sortable');
+                if (columnKey === 'Precio Gasoleo A') {
+                    th.classList.add('fuel-diesel');
+                } else if (columnKey === 'Precio Gasoleo Premium') {
+                    th.classList.add('fuel-diesel-plus');
+                } else if (columnKey === 'Precio Gasolina 95 E5') {
+                    th.classList.add('fuel-sp-95');
+                } else if (columnKey === 'Precio Gasolina 98 E5') {
+                    th.classList.add('fuel-sp-98');
+                }
+                th.addEventListener('click', () => {
+                    const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
+                    sortOrder = {};
+                    sortOrder[columnKey] = isAscending;
+                    sortStationsByPrice(currentStations, columnKey, isAscending);
+                });
             }
-            th.addEventListener('click', () => {
-                const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
-                sortOrder = {};
-                sortOrder[columnKey] = isAscending;
-                sortStationsByPrice(currentStations, columnKey, isAscending);
-            });
+            headerRow.appendChild(th);
+        } else {
+            console.error(`Column not found for key: ${columnKey}`);
         }
-        headerRow.appendChild(th);
     });
     tableHead.appendChild(headerRow);
 
@@ -261,6 +289,7 @@ function displayStations(stations) {
         });
         tableBody.appendChild(row);
     });
+    console.log("Table updated with visible columns:", visibleColumns);
     updateSortIndicators();
 }
 
