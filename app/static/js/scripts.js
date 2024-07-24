@@ -23,6 +23,31 @@ let currentStations = [];
 let sortOrder = {};
 let currentSortColumn = null;
 
+function calculatePriceStats(stations, priceType) {
+    const prices = stations
+        .map(station => parseFloat(station[priceType].replace(',', '.')))
+        .filter(price => !isNaN(price) && price > 0);
+
+    if (prices.length === 0) return null;
+
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const avg = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+    const delta = max - min;
+
+    return { min, max, avg, delta };
+}
+
+function updatePriceStats(stations) {
+    const priceColumns = columns.filter(col => col.key.startsWith('Precio'));
+    priceColumns.forEach(column => {
+        const stats = calculatePriceStats(stations, column.key);
+        if (stats) {
+            column.stats = stats;
+        }
+    });
+}
+
 function toggleColumnMenu() {
     const menu = document.getElementById('column-menu');
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
@@ -76,6 +101,7 @@ async function fetchStations() {
 
 function displayStations(stations) {
     currentStations = stations; // Update current stations
+    updatePriceStats(stations);
     console.log('Displaying stations:', stations);
     const tableHead = document.getElementById('stations-table-head');
     const tableBody = document.getElementById('stations-table-body');
@@ -90,7 +116,8 @@ function displayStations(stations) {
     const headerRow = document.createElement('tr');
     visibleColumns.forEach(columnKey => {
         const th = document.createElement('th');
-        th.textContent = columns.find(col => col.key === columnKey).display;
+        const column = columns.find(col => col.key === columnKey);
+        th.textContent = column.display;
         if (columnKey.startsWith('Precio')) {
             th.classList.add('sortable');
             if(columnKey === 'Precio Gasoleo A'){
@@ -120,10 +147,18 @@ function displayStations(stations) {
             const cell = document.createElement('td');
             if (columnKey.startsWith('Precio')) {
                 cell.classList.add('seven-segment');
-                if(station[columnKey]===""){
+                const price = parseFloat(station[columnKey].replace(',', '.'));
+                if(isNaN(price) || price===0){
                     cell.textContent = "-";
                 } else {
                     cell.textContent = station[columnKey];
+
+                    const column = columns.find(col => col.key === columnKey);
+                    const stats = column.stats;
+                    if (stats) {
+                        if (price === stats.min) cell.classList.add('lowest-price');
+                        if (price === stats.max) cell.classList.add('highest-price');
+                    }
                 }
             } else if (columnKey === 'Horario') {
                 const { status, formattedTimetable } = getStatusAndTimetable(station[columnKey]);
