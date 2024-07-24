@@ -90,9 +90,18 @@ function toggleColumnMenu() {
 
 function initializeColumnMenu() {
     const menu = document.getElementById('column-menu');
+    const closeButton = document.createElement('label');
     const hra = document.createElement('hr');
     const hrb = document.createElement('hr');
 
+    closeButton.addEventListener('click', () => {
+        menu.style.display = 'none';
+    });
+
+    closeButton.textContent = '✖';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = 'red';
+    menu.appendChild(closeButton);
 
     const settingsLabel = document.createElement('label');
     settingsLabel.textContent = 'Settings';
