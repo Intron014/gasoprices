@@ -21,6 +21,7 @@ const columns = [
 let visibleColumns = columns.filter(col => col.default).map(col => col.key);
 let currentStations = [];
 let sortOrder = {};
+let currentSortColumn = null;
 
 function toggleColumnMenu() {
     const menu = document.getElementById('column-menu');
@@ -102,8 +103,10 @@ function displayStations(stations) {
                 th.classList.add('fuel-sp-98');
             }
             th.addEventListener('click', () => {
-                sortOrder[columnKey] = !sortOrder[columnKey];
-                sortStationsByPrice(currentStations, columnKey, sortOrder[columnKey]);
+                const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
+                sortOrder = {};
+                sortOrder[columnKey] = isAscending;
+                sortStationsByPrice(currentStations, columnKey, isAscending);
             });
         }
         headerRow.appendChild(th);
@@ -237,15 +240,15 @@ function showTimetable(cell, timetable) {
 function updateSortIndicators() {
     const headers = document.querySelectorAll('.sortable');
     headers.forEach(header => {
-        header.classList.remove('sorted-asc', 'sorted-desc');
-        header.classList.remove('sorted');
+        header.classList.remove('sorted-asc', 'sorted-desc', 'sorted');
     });
 
-    const sortedColumn = Object.keys(sortOrder).find(key => sortOrder[key] !== undefined);
-    if (sortedColumn) {
-        const header = Array.from(headers).find(header => header.textContent === columns.find(col => col.key === sortedColumn).display);
+    if (currentSortColumn) {
+        const header = Array.from(headers).find(header =>
+            header.textContent === columns.find(col => col.key === currentSortColumn).display
+        );
         if (header) {
-            header.classList.add(sortOrder[sortedColumn] ? 'sorted-asc' : 'sorted-desc');
+            header.classList.add(sortOrder[currentSortColumn] ? 'sorted-asc' : 'sorted-desc');
             header.classList.add('sorted');
         }
     }
@@ -277,12 +280,14 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 function sortStationsByPrice(stations, priceType, asc) {
+    currentSortColumn = priceType;
     stations.sort((a, b) => {
-        const priceA = parseFloat(a[priceType].replace(',', '.'));
-        const priceB = parseFloat(b[priceType].replace(',', '.'));
+        const priceA = parseFloat(a[priceType].replace(',', '.')) || 0;
+        const priceB = parseFloat(b[priceType].replace(',', '.')) || 0;
         return asc ? priceA - priceB : priceB - priceA;
     });
     displayStations(stations);
+    updateSortIndicators();
 }
 
 async function filterStationsByDistance(maxDistance) {
