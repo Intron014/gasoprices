@@ -231,6 +231,12 @@ function getStatusAndTimetable(horario) {
 function showTimetable(cell, timetable) {
     console.log('Showing timetable:', timetable);
     const existingTimetable = document.querySelector('.timetable');
+
+    if (existingTimetable && cell.contains(existingTimetable)) {
+        existingTimetable.remove();
+        return;
+    }
+
     if (existingTimetable) {
         existingTimetable.remove();
     }
@@ -246,18 +252,27 @@ function showTimetable(cell, timetable) {
     timetableElement.style.top = `${rect.bottom}px`;
     timetableElement.style.left = `${rect.left}px`;
     timetableElement.style.zIndex = '9999';
-    timetableElement.style.background = 'white';
-    timetableElement.style.border = '1px solid black';
     timetableElement.style.padding = '10px';
-    timetableElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
     timetableElement.style.maxWidth = '300px';
     timetableElement.style.wordWrap = 'break-word';
     timetableElement.style.display = 'block';
 
-    document.body.appendChild(timetableElement);
-    console.log('Timetable element added to body');
+    // Check if dark mode is active
+    if (document.body.classList.contains('dark-mode')) {
+        timetableElement.style.backgroundColor = '#2a2a2a';
+        timetableElement.style.color = '#f0f0f0';
+        timetableElement.style.border = '1px solid #4a4a4a';
+        timetableElement.style.boxShadow = '0 2px 5px rgba(255,255,255,0.2)';
+    } else {
+        timetableElement.style.backgroundColor = 'white';
+        timetableElement.style.color = '#333';
+        timetableElement.style.border = '1px solid black';
+        timetableElement.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    }
 
-    // Adjust position if it goes off-screen
+    cell.appendChild(timetableElement);
+    console.log('Timetable element added to cell');
+
     const timetableRect = timetableElement.getBoundingClientRect();
     if (timetableRect.right > window.innerWidth) {
         timetableElement.style.left = `${window.innerWidth - timetableRect.width - 10}px`;
@@ -265,12 +280,13 @@ function showTimetable(cell, timetable) {
 
     document.addEventListener('click', (event) => {
         console.log('Document clicked:', event.target);
-        if (!timetableElement.contains(event.target) && event.target !== cell) {
+        if (!timetableElement.contains(event.target) && event.target !== cell && !cell.contains(event.target)) {
             timetableElement.remove();
             console.log('Timetable element removed');
         }
     }, { once: true });
 }
+
 
 function updateSortIndicators() {
     const headers = document.querySelectorAll('.sortable');

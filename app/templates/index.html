@@ -49,10 +49,12 @@
         darkModeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+            darkModeToggle.textContent = body.classList.contains('dark-mode') ? 'LM' : 'DM';
         });
 
         if (localStorage.getItem('darkMode') === 'true') {
             body.classList.add('dark-mode');
+            darkModeToggle.textContent = 'LM';
         }
     </script>
 </body>
