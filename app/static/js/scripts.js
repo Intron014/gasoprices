@@ -22,6 +22,41 @@ let visibleColumns = columns.filter(col => col.default).map(col => col.key);
 let currentStations = [];
 let sortOrder = {};
 let currentSortColumn = null;
+let mapEmbedsEnabled = false;
+
+function showMapEmbed(event, station) {
+    if (!mapEmbedsEnabled) return;
+
+    const existingEmbed = document.querySelector('.map-embed');
+    if (existingEmbed) existingEmbed.remove();
+
+    const mapEmbed = document.createElement('div');
+    mapEmbed.className = 'map-embed';
+    const lat = parseFloat(station['Latitud'].replace(',', '.'));
+    const lon = parseFloat(station['Longitud (WGS84)'].replace(',', '.'));
+
+    const iframe = document.createElement('iframe');
+    iframe.width = '300';
+    iframe.height = '200';
+    iframe.frameBorder = '0';
+    iframe.style.border = '0';
+    iframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.01},${lat-0.01},${lon+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lon}`;
+
+    mapEmbed.appendChild(iframe);
+
+    const rect = event.target.getBoundingClientRect();
+    mapEmbed.style.position = 'fixed';
+    mapEmbed.style.top = `${rect.bottom}px`;
+    mapEmbed.style.left = `${rect.left}px`;
+    mapEmbed.style.zIndex = '9999';
+
+    document.body.appendChild(mapEmbed);
+}
+
+function hideMapEmbed() {
+    const mapEmbed = document.querySelector('.map-embed');
+    if (mapEmbed) mapEmbed.remove();
+}
 
 function calculatePriceStats(stations, priceType) {
     const prices = stations
@@ -55,6 +90,29 @@ function toggleColumnMenu() {
 
 function initializeColumnMenu() {
     const menu = document.getElementById('column-menu');
+    const hra = document.createElement('hr');
+    const hrb = document.createElement('hr');
+
+
+    const settingsLabel = document.createElement('label');
+    settingsLabel.textContent = 'Settings';
+    menu.appendChild(settingsLabel);
+    menu.appendChild(hra);
+
+    // Map
+    const mapEmbedsLabel = document.createElement('label');
+    const mapEmbedsCheckbox = document.createElement('input');
+    mapEmbedsCheckbox.type = 'checkbox';
+    mapEmbedsCheckbox.checked = mapEmbedsEnabled;
+    mapEmbedsCheckbox.addEventListener('change', (e) => {
+        mapEmbedsEnabled = e.target.checked;
+    });
+    mapEmbedsLabel.appendChild(mapEmbedsCheckbox);
+    mapEmbedsLabel.appendChild(document.createTextNode('Enable Map Embeds'));
+    menu.appendChild(mapEmbedsLabel);
+
+
+    // Columns
     columns.forEach(column => {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
@@ -145,7 +203,12 @@ function displayStations(stations) {
         const row = document.createElement('tr');
         visibleColumns.forEach(columnKey => {
             const cell = document.createElement('td');
-            if (columnKey.startsWith('Precio')) {
+            if (columnKey === 'Dirección') {
+                cell.textContent = station[columnKey] || '';
+                cell.classList.add('address-cell');
+                cell.addEventListener('mouseenter', (e) => showMapEmbed(e, station));
+                cell.addEventListener('mouseleave', hideMapEmbed);
+            } else if (columnKey.startsWith('Precio')) {
                 cell.classList.add('seven-segment');
                 const price = parseFloat(station[columnKey].replace(',', '.'));
                 if(isNaN(price) || price===0){
