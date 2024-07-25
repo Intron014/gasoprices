@@ -90,51 +90,58 @@ function toggleColumnMenu() {
 
 function initializeColumnMenu() {
     const menu = document.getElementById('column-menu');
+    menu.innerHTML = '';
+
     const closeButton = document.createElement('label');
-    const hra = document.createElement('hr');
-    const hrb = document.createElement('hr');
-
-    closeButton.addEventListener('click', () => {
-        menu.style.display = 'none';
-    });
-
     closeButton.textContent = '✖';
     closeButton.style.cursor = 'pointer';
     closeButton.style.color = 'red';
+    closeButton.addEventListener('click', () => {
+        menu.style.display = 'none';
+    });
     menu.appendChild(closeButton);
 
     const settingsLabel = document.createElement('label');
     settingsLabel.textContent = 'Settings';
     menu.appendChild(settingsLabel);
-    menu.appendChild(hra);
+    menu.appendChild(document.createElement('hr'));
 
-    // Map
+    const generalSettings = document.createElement('div');
+    generalSettings.id = 'general-settings';
+
+    // Map Embeds
     const mapEmbedsLabel = document.createElement('label');
     const mapEmbedsCheckbox = document.createElement('input');
     mapEmbedsCheckbox.type = 'checkbox';
+    mapEmbedsCheckbox.id = 'map-embeds-checkbox';
     mapEmbedsCheckbox.checked = mapEmbedsEnabled;
     mapEmbedsCheckbox.addEventListener('change', (e) => {
         mapEmbedsEnabled = e.target.checked;
     });
     mapEmbedsLabel.appendChild(mapEmbedsCheckbox);
     mapEmbedsLabel.appendChild(document.createTextNode('Enable Map Embeds'));
-    menu.appendChild(mapEmbedsLabel);
+    generalSettings.appendChild(mapEmbedsLabel);
 
-    // OpenClose
+    // Open/Close Filter
     const openCloseLabel = document.createElement('label');
     const openCloseCheckbox = document.createElement('input');
     openCloseCheckbox.type = 'checkbox';
+    openCloseCheckbox.id = 'open-close-checkbox';
     openCloseCheckbox.checked = true;
     openCloseLabel.appendChild(openCloseCheckbox);
     openCloseLabel.appendChild(document.createTextNode('Show only Open Stations'));
-    menu.appendChild(openCloseLabel);
+    generalSettings.appendChild(openCloseLabel);
+
+    menu.appendChild(generalSettings);
 
     const columnsLabel = document.createElement('label');
     columnsLabel.textContent = 'Columns';
     menu.appendChild(columnsLabel);
-    menu.appendChild(hrb);
+    menu.appendChild(document.createElement('hr'));
 
-    // Columns
+    const columnSelection = document.createElement('div');
+    columnSelection.id = 'column-selection';
+
     columns.forEach(column => {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
@@ -144,17 +151,19 @@ function initializeColumnMenu() {
         checkbox.addEventListener('change', updateVisibleColumns);
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(column.display));
-        menu.appendChild(label);
+        columnSelection.appendChild(label);
     });
+
+    menu.appendChild(columnSelection);
 }
 
 function updateVisibleColumns() {
     console.log("Updating visible columns...");
-    const checkboxes = document.querySelectorAll('#column-menu input[type="checkbox"]');
+    const checkboxes = document.querySelectorAll('#column-selection input[type="checkbox"]');
     console.log("Found checkboxes:", checkboxes.length);
 
     visibleColumns = Array.from(checkboxes)
-        .filter(cb => cb.checked && cb.value !== 'undefined')
+        .filter(cb => cb.checked)
         .map(cb => cb.value);
 
     console.log("Visible columns after filter:", visibleColumns);
