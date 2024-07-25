@@ -108,6 +108,9 @@ function initializeColumnMenu() {
 
     const settingsLabel = document.createElement('label');
     settingsLabel.textContent = 'Settings';
+    settingsLabel.style.fontWeight = 'bold';
+    settingsLabel.style.cursor = 'default';
+    settingsLabel.style.userSelect = 'none';
     menu.appendChild(settingsLabel);
     menu.appendChild(document.createElement('hr'));
 
@@ -146,6 +149,9 @@ function initializeColumnMenu() {
 
     const columnsLabel = document.createElement('label');
     columnsLabel.textContent = 'Columns';
+    columnsLabel.style.fontWeight = 'bold';
+    columnsLabel.style.cursor = 'default';
+    columnsLabel.style.userSelect = 'none';
     menu.appendChild(columnsLabel);
     menu.appendChild(document.createElement('hr'));
 
