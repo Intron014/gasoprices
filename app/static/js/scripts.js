@@ -132,9 +132,14 @@ function initializeColumnMenu() {
     const openCloseCheckbox = document.createElement('input');
     openCloseCheckbox.type = 'checkbox';
     openCloseCheckbox.id = 'open-close-checkbox';
-    openCloseCheckbox.checked = true;
+    openCloseCheckbox.checked = false;
     openCloseLabel.appendChild(openCloseCheckbox);
     openCloseLabel.appendChild(document.createTextNode('Show only Open Stations'));
+    openCloseCheckbox.addEventListener('change', () => {
+        if (currentStations && currentStations.length > 0) {
+            displayStations(currentStations);
+        }
+    });
     generalSettings.appendChild(openCloseLabel);
 
     menu.appendChild(generalSettings);
@@ -275,6 +280,14 @@ function displayStations(stations) {
 
     // Create table body
     stations.forEach((station, index) => {
+
+        const { status, formattedTimetable} = getStatusAndTimetable(station['Horario']);
+        const showOnlyOpenStations = document.getElementById('open-close-checkbox').checked;
+
+        if (showOnlyOpenStations && status === 'CLOSED') {
+            return;
+        }
+
         const row = document.createElement('tr');
         visibleColumns.forEach(columnKey => {
             const cell = document.createElement('td');
@@ -299,7 +312,6 @@ function displayStations(stations) {
                     }
                 }
             } else if (columnKey === 'Horario') {
-                const { status, formattedTimetable } = getStatusAndTimetable(station[columnKey]);
                 console.log(`Station ${index} status:`, status, 'Timetable:', formattedTimetable);
                 const statusSpan = document.createElement('span');
                 if(status === '24/7'){
