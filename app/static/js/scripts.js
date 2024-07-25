@@ -238,7 +238,19 @@ function displayStations(stations) {
             const th = document.createElement('th');
             th.textContent = column.display;
             if (columnKey.startsWith('Precio')) {
-                th.classList.add('sortable');
+                const hasPrices = columnHasPrices(stations, columnKey);
+                if (!hasPrices) {
+                    th.style.textDecoration = 'line-through';
+                    th.style.color = 'gray';
+                } else {
+                    th.classList.add('sortable');
+                    th.addEventListener('click', () => {
+                        const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
+                        sortOrder = {};
+                        sortOrder[columnKey] = isAscending;
+                        sortStationsByPrice(currentStations, columnKey, isAscending);
+                    });
+                }
                 switch (columnKey) {
                     case 'Precio Gasoleo A':
                         th.classList.add('fuel-diesel');
@@ -253,12 +265,6 @@ function displayStations(stations) {
                         th.classList.add('fuel-sp-98');
                         break;
                 }
-                th.addEventListener('click', () => {
-                    const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
-                    sortOrder = {};
-                    sortOrder[columnKey] = isAscending;
-                    sortStationsByPrice(currentStations, columnKey, isAscending);
-                });
             }
             headerRow.appendChild(th);
         } else {
@@ -463,7 +469,18 @@ function getDistance(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.asin(Math.sqrt(a));
 }
 
+function columnHasPrices(stations, columnKey) {
+    return stations.some(station => {
+        const price = parseFloat(station[columnKey].replace(',', '.'));
+        return !isNaN(price) && price > 0;
+    });
+}
+
 function sortStationsByPrice(stations, priceType, asc) {
+    if (!columnHasPrices(stations, priceType)) {
+        console.log(`Cannot sort by ${priceType} as there are no prices available.`);
+        return;
+    }
     currentSortColumn = priceType;
     stations.sort((a, b) => {
         const priceA = parseFloat(a[priceType].replace(',', '.'));
