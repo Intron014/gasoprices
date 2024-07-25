@@ -466,9 +466,13 @@ function getDistance(lat1, lon1, lat2, lon2) {
 function sortStationsByPrice(stations, priceType, asc) {
     currentSortColumn = priceType;
     stations.sort((a, b) => {
-        const priceA = parseFloat(a[priceType].replace(',', '.')) || 0;
-        const priceB = parseFloat(b[priceType].replace(',', '.')) || 0;
-        return asc ? priceA - priceB : priceB - priceA;
+        const priceA = parseFloat(a[priceType].replace(',', '.'));
+        const priceB = parseFloat(b[priceType].replace(',', '.'));
+        if (!isNaN(priceA) && !isNaN(priceB)) {
+            return asc ? priceA - priceB : priceB - priceA;
+        }
+        if (isNaN(priceA)) return 1;
+        if (isNaN(priceB)) return -1;
     });
     displayStations(stations);
     updateSortIndicators();
