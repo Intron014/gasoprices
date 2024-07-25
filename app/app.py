@@ -39,6 +39,13 @@ def filter_fuel_stations():
 @app.route('/')
 def index():
     return render_template('index.html')
+@app.route('/manifest.json')
+def serve_manifest():
+    return app.send_static_file('manifest.json')
+
+@app.route('/sw.js')
+def serve_service_worker():
+    return app.send_static_file('sw.js')
 
 if __name__ == '__main__':
     app.run(debug=True)
