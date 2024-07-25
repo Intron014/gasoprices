@@ -239,14 +239,19 @@ function displayStations(stations) {
             th.textContent = column.display;
             if (columnKey.startsWith('Precio')) {
                 th.classList.add('sortable');
-                if (columnKey === 'Precio Gasoleo A') {
-                    th.classList.add('fuel-diesel');
-                } else if (columnKey === 'Precio Gasoleo Premium') {
-                    th.classList.add('fuel-diesel-plus');
-                } else if (columnKey === 'Precio Gasolina 95 E5') {
-                    th.classList.add('fuel-sp-95');
-                } else if (columnKey === 'Precio Gasolina 98 E5') {
-                    th.classList.add('fuel-sp-98');
+                switch (columnKey) {
+                    case 'Precio Gasoleo A':
+                        th.classList.add('fuel-diesel');
+                        break;
+                    case 'Precio Gasoleo Premium':
+                        th.classList.add('fuel-diesel-plus');
+                        break;
+                    case 'Precio Gasolina 95 E5':
+                        th.classList.add('fuel-sp-95');
+                        break;
+                    case 'Precio Gasolina 98 E5':
+                        th.classList.add('fuel-sp-98');
+                        break;
                 }
                 th.addEventListener('click', () => {
                     const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
