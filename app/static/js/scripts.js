@@ -227,6 +227,13 @@ async function fetchStations() {
 }
 
 function displayStations(stations) {
+
+    if (!Array.isArray(stations)) {
+        console.error('displayStations received non-array data:', stations);
+        alert('Error: Received invalid data from the server.');
+        return;
+    }
+
     console.log("Displaying stations:", stations.length);
     currentStations = stations; // Update current stations
     updatePriceStats(stations);
@@ -467,13 +474,35 @@ function toggleSearchMenu() {
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
-async function searchStations(event) {
+function searchStations(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const params = new URLSearchParams(formData).toString();
-    const response = await fetch(`/fuel_stations/filter?${params}`);
-    const data = await response.json();
-    displayStations(data);
+    const municipio = formData.get('municipio');
+    console.log('Selected municipio:', municipio);
+
+    let url = `/fuel_stations/filter/${municipio}`;
+    console.log('Request URL:', url);
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            if (Array.isArray(data.ListaEESSPrecio)) {
+                displayStations(data.ListaEESSPrecio);
+            } else {
+                console.error('Unexpected data structure:', data);
+                alert('Received unexpected data structure from the server.');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching filtered stations:', error);
+            alert('Error loading filtered gas stations. Please try again later.');
+        });
 }
 
 function getDistance(lat1, lon1, lat2, lon2) {
@@ -568,11 +597,47 @@ function initializeDistanceFilter() {
     }
 }
 
+function initializeLocationFilters() {
+    const provinciaSelect = document.getElementById('provincia-select');
+    const municipioSelect = document.getElementById('municipio-select');
+
+    fetch('/provincias')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(provincia => {
+                const option = document.createElement('option');
+                option.value = provincia.IDPovincia;
+                option.textContent = provincia.Provincia;
+                provinciaSelect.appendChild(option);
+            });
+        });
+
+    provinciaSelect.addEventListener('change', (event) => {
+        const provinciaId = event.target.value;
+        municipioSelect.innerHTML = '<option value="">Select Municipio</option>';
+
+        if (provinciaId) {
+            fetch(`/municipios/${provinciaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(municipio => {
+                        const option = document.createElement('option');
+                        option.value = municipio.IDMunicipio;
+                        option.textContent = municipio.Municipio;
+                        municipioSelect.appendChild(option);
+                    });
+                });
+        }
+    });
+}
+
+
 function update_date(date) {
     document.getElementById('update-date').textContent = "Latest update:\n" + date;
 }
 
 window.onload = function() {
     initializeDistanceFilter();
+    initializeLocationFilters();
     initializeColumnMenu();
 };
