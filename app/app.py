@@ -1,6 +1,9 @@
 from flask import Flask, jsonify, request, render_template
 import requests
 import logging
+from datetime import datetime, timedelta
+import json
+import os
 
 app = Flask(__name__)
 if __name__ != '__main__':
@@ -8,13 +11,55 @@ if __name__ != '__main__':
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
 
+CACHE_FILE = 'fuel_stations_cache.json'
+last_fetch_time = None
+cached_data = None
 
-@app.route('/fuel_stations', methods=['GET'])
-def get_fuel_stations():
+def should_fetch_data():
+    global last_fetch_time
+    current_time = datetime.now()
+
+    if last_fetch_time is None:
+        return True
+
+    time_diff = current_time - last_fetch_time
+    minutes_passed = time_diff.total_seconds() / 60
+
+    return (current_time.minute % 30 == 0 and minutes_passed >= 1) or minutes_passed >= 30
+
+def fetch_and_cache_data():
+    global last_fetch_time, cached_data
+
     url = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
     response = requests.get(url)
     data = response.json()
-    return jsonify(data)
+
+    with open(CACHE_FILE, 'w') as cache_file:
+        json.dump(data, cache_file)
+
+    last_fetch_time = datetime.now()
+    cached_data = data
+    return data
+
+def get_cached_data():
+    global cached_data
+    if cached_data is None:
+        if os.path.exists(CACHE_FILE):
+            with open(CACHE_FILE, 'r') as cache_file:
+                cached_data = json.load(cache_file)
+        else:
+            cached_data = fetch_and_cache_data()
+    return cached_data
+
+@app.route('/fuel_stations', methods=['GET'])
+def get_fuel_stations():
+    if should_fetch_data():
+        app.logger.info("Fetching new data from API")
+        return jsonify(fetch_and_cache_data())
+    else:
+        app.logger.info("Returning cached data")
+        return jsonify(get_cached_data())
+
 
 
 @app.route('/fuel_stations/filter/<mmid>', methods=['GET'])
