@@ -53,6 +53,7 @@ def get_cached_data():
 
 @app.route('/fuel_stations', methods=['GET'])
 def get_fuel_stations():
+    app.logger.info("OS requesting: " + request.headers.get('User-Agent'))
     if should_fetch_data():
         app.logger.info("Fetching new data from API")
         return jsonify(fetch_and_cache_data())
