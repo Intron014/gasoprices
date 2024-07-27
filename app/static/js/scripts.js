@@ -30,6 +30,19 @@ let sortOrder = {};
 let currentSortColumn = null;
 let mapEmbedsEnabled = false;
 
+function saveColumnPreferences() {
+    localStorage.setItem('visibleColumns', JSON.stringify(visibleColumns));
+}
+
+function loadColumnPreferences() {
+    const savedColumns = localStorage.getItem('visibleColumns');
+    if (savedColumns) {
+        visibleColumns = JSON.parse(savedColumns);
+    } else {
+        visibleColumns = columns.filter(col => col.default).map(col => col.key);
+    }
+}
+
 function showMapEmbed(event, station) {
     if (!mapEmbedsEnabled) return;
 
@@ -164,7 +177,7 @@ function initializeColumnMenu() {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.value = column.key;
-        checkbox.checked = column.default;
+        checkbox.checked = visibleColumns.includes(column.key);
         checkbox.addEventListener('change', updateVisibleColumns);
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(column.display));
@@ -194,6 +207,8 @@ function updateVisibleColumns() {
     }
 
     console.log("Final visible columns:", visibleColumns);
+
+    saveColumnPreferences();
 
     if (currentStations && currentStations.length > 0) {
         console.log("Displaying stations...");
@@ -638,7 +653,9 @@ function update_date(date) {
 }
 
 window.onload = function() {
+    loadColumnPreferences();
     initializeDistanceFilter();
     initializeLocationFilters();
     initializeColumnMenu();
 };
+
