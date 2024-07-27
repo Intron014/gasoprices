@@ -298,6 +298,26 @@ function displayStations(stations) {
                     case 'Precio Gasolina 98 E5':
                         th.classList.add('fuel-sp-98');
                         break;
+                    case 'Precio Biodiesel':
+                        th.classList.add('fuel-biodiesel');
+                        break;
+                    case 'Precio Bioetanol':
+                        th.classList.add('fuel-bioetanol');
+                        break;
+                    case 'Precio Gas Natural Comprimido':
+                        th.classList.add('fuel-gnc');
+                        break;
+                    case 'Precio Gas Natural Licuado':
+                        th.classList.add('fuel-gnl');
+                        break;
+                    case 'Precio Gases licuados del petróleo':
+                        th.classList.add('fuel-glp');
+                        break;
+                    case 'Precio Hidrogeno':
+                        th.classList.add('fuel-h2');
+                        break;
+                    default:
+                        console.error(`Unknown fuel type: ${columnKey}`);
                 }
             }
             headerRow.appendChild(th);

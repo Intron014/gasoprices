@@ -159,6 +159,30 @@ tr:hover {
     color: #2ecc50;
 }
 
+.fuel-biodiesel {
+    color: #fff8ea;
+}
+
+.fuel-bioetanol {
+    color: #519500;
+}
+
+.fuel-gnc {
+    color: #f39c12;
+}
+
+.fuel-gnl {
+    color: #e82f2f;
+}
+
+.fuel-glp {
+    color: #12f3ec;
+}
+
+.fuel-h2 {
+    color: #12bff3;
+}
+
 .highlight {
     background-color: #dff0d8;
 }
@@ -391,6 +415,30 @@ body.dark-mode .fuel-sp-98 {
 
 body.dark-mode .fuel-sp-95 {
     color: #5cd85a;
+}
+
+body.dark-mode .fuel-biodiesel {
+    color: #fff8ea;
+}
+
+body.dark-mode .fuel-bioetanol {
+    color: #519500;
+}
+
+body.dark-mode .fuel-gnc {
+    color: #f39c12;
+}
+
+body.dark-mode .fuel-gnl {
+    color: #e82f2f;
+}
+
+body.dark-mode .fuel-glp {
+    color: #12f3ec;
+}
+
+body.dark-mode .fuel-h2 {
+    color: #12bff3;
 }
 
 body.dark-mode .highlight {
