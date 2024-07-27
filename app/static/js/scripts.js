@@ -16,6 +16,7 @@ const columns = [
     { key: "Precio Bioetanol", display: "Bioetanol", default: false },
     { key: "Precio Gas Natural Comprimido", display: "GNC", default: false },
     { key: "Precio Gas Natural Licuado", display: "GNL", default: false },
+    { key: "Precio Gases licuados del petróleo", display: "GLP", default: false },
     { key: "Precio Hidrogeno", display: "H2", default: false },
     { key: "Provincia", display: "Provincia", default: false },
     { key: "Remisión", display: "Remission", default: false },
