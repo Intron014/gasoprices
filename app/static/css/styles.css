@@ -271,7 +271,7 @@ tr:hover {
 
 }
 
-#language-selector {
+select {
     background-color: var(--button-bg);
     color: var(--button-color);
     border: none;
@@ -282,7 +282,7 @@ tr:hover {
 }
 
 
-#language-selector:hover {
+select:hover {
     background-color: var(--button-hover-bg);
 }
 
@@ -473,13 +473,13 @@ body.dark-mode .status-closed {
     color: #ff7675;
 }
 
-body.dark-mode #language-selector {
+body.dark-mode select {
     background-color: #4a4a4a;
     color: #f0f0f0;
     border-color: #4a4a4a;
 }
 
-body.dark-mode #language-selector:hover {
+body.dark-mode select:hover {
     background-color: #5a5a5a;
 }
 
