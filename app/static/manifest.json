@@ -50,5 +50,50 @@
             "sizes": "512x512",
             "type": "image/png"
         }
+    ],
+    "apple_mobile_web_app_capable": "yes",
+    "apple_mobile_web_app_status_bar_style": "black-translucent",
+    "apple_mobile_web_app_title": "GasoPrice",
+    "apple_touch_icon": {
+        "src": "/static/icons/apple-touch-icon.png",
+        "sizes": "180x180",
+        "type": "image/png"
+    },
+    "splash_screens": [
+        {
+            "src": "/static/splash/splash_640x1136.png",
+            "sizes": "640x1136",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/splash/splash_750x1334.png",
+            "sizes": "750x1334",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/splash/splash_1242x2208.png",
+            "sizes": "1242x2208",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/splash/splash_1125x2436.png",
+            "sizes": "1125x2436",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/splash/splash_1536x2048.png",
+            "sizes": "1536x2048",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/splash/splash_1668x2224.png",
+            "sizes": "1668x2224",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/splash/splash_2048x2732.png",
+            "sizes": "2048x2732",
+            "type": "image/png"
+        }
     ]
 }
