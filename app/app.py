@@ -112,8 +112,11 @@ def server_translations():
     return app.send_static_file('stuff/translations.json')
 @app.route('/sw.js')
 def serve_service_worker():
-    return app.send_static_file('sw.js')
     return app.send_static_file('stuff/sw.js')
+
+@app.route('/.well-known/assetlinks.json')
+def serve_asset_links():
+    return app.send_static_file('stuff/assetlinks.json')
 
 
 if __name__ == '__main__':
