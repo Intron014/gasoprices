@@ -105,14 +105,15 @@ def index():
 
 @app.route('/manifest.json')
 def serve_manifest():
-    return app.send_static_file('manifest.json')
+    return app.send_static_file('stuff/manifest.json')
 
 @app.route('/translations')
 def server_translations():
-    return app.send_static_file('translations.json')
+    return app.send_static_file('stuff/translations.json')
 @app.route('/sw.js')
 def serve_service_worker():
     return app.send_static_file('sw.js')
+    return app.send_static_file('stuff/sw.js')
 
 
 if __name__ == '__main__':
