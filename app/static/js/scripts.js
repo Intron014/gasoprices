@@ -32,13 +32,17 @@ let mapEmbedsEnabled = false;
 let currentLanguage = 'es';
 let translations = {}
 
-async function loadTranslations() {
-    const response = await fetch('/translations');
-    translations = await response.json();
+function loadTranslations() {
+    return fetch('/translations')
+        .then(response => response.json())
+        .then(data => {
+            translations = data;
+            return translations;
+        });
 }
 
 function translate(key) {
-    return translations[key][currentLanguage] || key;
+    return translations[key]?.[currentLanguage] || key;
 }
 
 function initializeDarkMode() {
@@ -256,7 +260,7 @@ function initializeColumnMenu() {
         checkbox.checked = visibleColumns.includes(column.key);
         checkbox.addEventListener('change', updateVisibleColumns);
         label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(column.display));
+        label.appendChild(document.createTextNode(translate(column.display)));
         columnSelection.appendChild(label);
     });
 
