@@ -1,6 +1,6 @@
 {
     "name": "GasoPrice",
-    "short_name": "GasoProce",
+    "short_name": "GasoPrice",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
