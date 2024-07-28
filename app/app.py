@@ -107,7 +107,9 @@ def index():
 def serve_manifest():
     return app.send_static_file('manifest.json')
 
-
+@app.route('/translations')
+def server_translations():
+    return app.send_static_file('translations.json')
 @app.route('/sw.js')
 def serve_service_worker():
     return app.send_static_file('sw.js')

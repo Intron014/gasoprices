@@ -29,6 +29,82 @@ let currentStations = [];
 let sortOrder = {};
 let currentSortColumn = null;
 let mapEmbedsEnabled = false;
+let currentLanguage = 'es';
+let translations = {}
+
+async function loadTranslations() {
+    const response = await fetch('/translations');
+    translations = await response.json();
+}
+
+function translate(key) {
+    return translations[key][currentLanguage] || key;
+}
+
+function initializeDarkMode() {
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const body = document.body;
+
+    if (localStorage.getItem('darkMode') === 'true') {
+        body.classList.add('dark-mode');
+        darkModeToggle.textContent = translate('lightMode');
+    } else {
+        body.classList.remove('dark-mode');
+        darkModeToggle.textContent = translate('darkMode');
+    }
+}
+
+function darkModeToggle() {
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const body = document.body;
+
+    darkModeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        const isDarkMode = body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        darkModeToggle.textContent = translate(isDarkMode ? 'lightMode' : 'darkMode');
+    });
+
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    darkModeToggle.textContent = translate(isDarkMode ? 'lightMode' : 'darkMode');
+}
+
+
+
+function updateLanguage() {
+    document.querySelector('h1').textContent = translate('title');
+    document.querySelector('p').textContent = translate('subtitle');
+    document.getElementById('toggle-search-menu').textContent = translate('filter');
+    document.getElementById('toggle-column-menu').textContent = translate('settings');
+    document.getElementById('distance-input').placeholder = translate('distancePlaceholder');
+    document.getElementById('filter-by-distance').textContent = translate('filter');
+    document.getElementById('provincia-select').firstElementChild.textContent = translate('selectProvincia');
+    document.getElementById('municipio-select').firstElementChild.textContent = translate('selectMunicipio');
+    document.getElementById('search-button').textContent = translate('search');
+    document.getElementById('loading-text').textContent = translate('loadingStations');
+
+
+    const updateDateElement = document.getElementById('update-date');
+    if (updateDateElement.textContent) {
+        const datePart = updateDateElement.textContent.split('\n')[1];
+        updateDateElement.textContent = `${translate('latestUpdate')}\n${datePart}`;
+    }
+
+    initializeColumnMenu();
+    initializeDarkMode();
+
+    if (currentStations && currentStations.length > 0) {
+        displayStations(currentStations);
+    }
+}
+
+function initializeLanguageSelector() {
+    const languageSelector = document.getElementById('language-selector');
+    languageSelector.addEventListener('change', (event) => {
+        currentLanguage = event.target.value;
+        updateLanguage();
+    });
+}
 
 function saveColumnPreferences() {
     localStorage.setItem('visibleColumns', JSON.stringify(visibleColumns));
@@ -121,7 +197,7 @@ function initializeColumnMenu() {
     menu.appendChild(closeButton);
 
     const settingsLabel = document.createElement('label');
-    settingsLabel.textContent = 'Settings';
+    settingsLabel.textContent = translate('settings');
     settingsLabel.style.fontWeight = 'bold';
     settingsLabel.style.cursor = 'default';
     settingsLabel.style.userSelect = 'none';
@@ -141,7 +217,7 @@ function initializeColumnMenu() {
         mapEmbedsEnabled = e.target.checked;
     });
     mapEmbedsLabel.appendChild(mapEmbedsCheckbox);
-    mapEmbedsLabel.appendChild(document.createTextNode('Enable Map Embeds'));
+    mapEmbedsLabel.appendChild(document.createTextNode(translate('mapEmbeds')));
     generalSettings.appendChild(mapEmbedsLabel);
 
     // Open/Close Filter
@@ -151,7 +227,7 @@ function initializeColumnMenu() {
     openCloseCheckbox.id = 'open-close-checkbox';
     openCloseCheckbox.checked = false;
     openCloseLabel.appendChild(openCloseCheckbox);
-    openCloseLabel.appendChild(document.createTextNode('Show only Open Stations'));
+    openCloseLabel.appendChild(document.createTextNode(translate('openStations')));
     openCloseCheckbox.addEventListener('change', () => {
         if (currentStations && currentStations.length > 0) {
             displayStations(currentStations);
@@ -162,7 +238,7 @@ function initializeColumnMenu() {
     menu.appendChild(generalSettings);
 
     const columnsLabel = document.createElement('label');
-    columnsLabel.textContent = 'Columns';
+    columnsLabel.textContent = translate('columns');
     columnsLabel.style.fontWeight = 'bold';
     columnsLabel.style.cursor = 'default';
     columnsLabel.style.userSelect = 'none';
@@ -270,7 +346,8 @@ function displayStations(stations) {
         const column = columns.find(col => col.key === columnKey);
         if(column) {
             const th = document.createElement('th');
-            th.textContent = column.display;
+            console.log('Creating column:', columnKey, column.display);
+            th.textContent = translate(column.display);
             if (columnKey.startsWith('Precio')) {
                 const hasPrices = columnHasPrices(stations, columnKey);
                 if (!hasPrices) {
@@ -333,7 +410,7 @@ function displayStations(stations) {
         const { status, formattedTimetable} = getStatusAndTimetable(station['Horario']);
         const showOnlyOpenStations = document.getElementById('open-close-checkbox').checked;
 
-        if (showOnlyOpenStations && status === 'CLOSED') {
+        if (showOnlyOpenStations && status === translate('closed')) {
             return;
         }
 
@@ -363,10 +440,15 @@ function displayStations(stations) {
             } else if (columnKey === 'Horario') {
                 console.log(`Station ${index} status:`, status, 'Timetable:', formattedTimetable);
                 const statusSpan = document.createElement('span');
-                if(status === '24/7'){
+                if(status === translate('open247')){
                     statusSpan.className = `status status-247`;
+                    statusSpan.textContent = translate('open247')
+                } else if(status === translate('open')){
+                    statusSpan.className = `status status-open`;
+                    statusSpan.textContent = translate('open');
                 } else {
-                    statusSpan.className = `status status-${status.toLowerCase()}`;
+                    statusSpan.className = `status status-closed`;
+                    statusSpan.textContent = translate('closed');
                 }
                 statusSpan.textContent = status;
                 cell.appendChild(statusSpan);
@@ -396,12 +478,12 @@ function getStatusAndTimetable(horario) {
     const days = ['D', 'L', 'M', 'X', 'J', 'V', 'S'];
     const currentDay = days[day];
 
-    let status = 'CLOSED';
+    let status = translate('closed');
     let formattedTimetable = horario;
 
     if (horario.includes('24H')) {
-        status = 'OPEN';
-        formattedTimetable = '24 hours / 7 days';
+        formattedTimetable = translate('open247');
+        status = translate('open');
     } else {
         const schedules = horario.split(';').map(s => s.trim());
         schedules.forEach(schedule => {
@@ -419,7 +501,7 @@ function getStatusAndTimetable(horario) {
 
             if (isDayInRange) {
                 if (time >= openTime && time < closeTime) {
-                    status = 'OPEN';
+                    status = translate('open');
                 }
             }
         });
@@ -672,10 +754,14 @@ function update_date(date) {
     document.getElementById('update-date').textContent = "Latest update:\n" + date;
 }
 
-window.onload = function() {
+window.onload = async function() {
+    await loadTranslations();
     loadColumnPreferences();
     initializeDistanceFilter();
     initializeLocationFilters();
     initializeColumnMenu();
+    initializeLanguageSelector();
+    initializeDarkMode();
+    updateLanguage();
 };
 

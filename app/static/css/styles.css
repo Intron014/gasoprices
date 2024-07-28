@@ -108,6 +108,10 @@ button:hover {
     border-radius: 3px;
 }
 
+select {
+    transition: background-color 0.3s ease;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -262,8 +266,24 @@ tr:hover {
     margin-bottom: 1rem;
 }
 
-.control-panel button {
+.control-panel button, .control-panel select {
     margin-left: 0.5rem;
+
+}
+
+#language-selector {
+    background-color: var(--button-bg);
+    color: var(--button-color);
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+
+#language-selector:hover {
+    background-color: var(--button-hover-bg);
 }
 
 .sortable {
@@ -451,6 +471,16 @@ body.dark-mode .status-open {
 
 body.dark-mode .status-closed {
     color: #ff7675;
+}
+
+body.dark-mode #language-selector {
+    background-color: #4a4a4a;
+    color: #f0f0f0;
+    border-color: #4a4a4a;
+}
+
+body.dark-mode #language-selector:hover {
+    background-color: #5a5a5a;
 }
 
 body.dark-mode .column-menu {

@@ -25,11 +25,18 @@
     <div class="container">
         <h1>GasoPrice</h1>
         <p>Find the cheapest gas stations in Spain</p>
+
         <div class="control-panel">
-            <button onclick="toggleSearchMenu()">Toggle Search Menu</button>
-            <button id="dark-mode-toggle">DM</button>
-            <button onclick="toggleColumnMenu()">Settings</button>
+            <button onclick="toggleSearchMenu()" id="toggle-search-menu">Toggle Search Menu</button>
+            <button onclick="darkModeToggle()" id="dark-mode-toggle">DM</button>
+            <button onclick="toggleColumnMenu()" id="toggle-column-menu">Settings</button>
+            <select id="language-selector">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="ca">Català</option>
+            </select>
         </div>
+
         <div id="search-menu" class="search-menu" style="display: none;">
             <form id="search-form" onsubmit="searchStations(event)">
                 <div id="distance-filter">
@@ -44,7 +51,7 @@
                     <select id="municipio-select" name="municipio">
                         <option value="">Select Municipio</option>
                     </select>
-                    <button type="submit">Search</button>
+                    <button id="search-button" type="submit">Search</button>
                 </div>
             </form>
         </div>
@@ -52,7 +59,7 @@
 
         <div id="loading-spinner" class="spinner-container" style="display: none;">
             <div class="spinner"></div>
-            <p>Loading gas stations...</p>
+            <p id="loading-text">Loading gas stations...</p>
         </div>
 
         <table id="stations-table">
@@ -62,20 +69,5 @@
     </div>
 
     {% include 'latest_up.html' %}
-    <script>
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const body = document.body;
-
-        darkModeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
-            darkModeToggle.textContent = body.classList.contains('dark-mode') ? 'LM' : 'DM';
-        });
-
-        if (localStorage.getItem('darkMode') === 'true') {
-            body.classList.add('dark-mode');
-            darkModeToggle.textContent = 'LM';
-        }
-    </script>
 </body>
 </html>
