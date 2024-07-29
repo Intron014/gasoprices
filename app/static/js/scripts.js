@@ -737,15 +737,17 @@ function updateSortIndicators() {
     });
 
     if (currentSortColumn) {
-        const header = Array.from(headers).find(header =>
-            header.textContent === columns.find(col => col.key === currentSortColumn).display
-        );
+        const header = Array.from(headers).find(header => {
+            const column = columns.find(col => col.key === currentSortColumn);
+            return header.textContent === translate(column.display);
+        });
         if (header) {
             header.classList.add(sortOrder[currentSortColumn] ? 'sorted-asc' : 'sorted-desc');
             header.classList.add('sorted');
         }
     }
 }
+
 
 function toggleSearchMenu() {
     const menu = document.getElementById('search-menu');
@@ -807,6 +809,7 @@ function sortStationsByPrice(stations, priceType, asc) {
         return;
     }
     currentSortColumn = priceType;
+    sortOrder[priceType] = asc;
     stations.sort((a, b) => {
         const priceA = parseFloat(a[priceType].replace(',', '.'));
         const priceB = parseFloat(b[priceType].replace(',', '.'));
