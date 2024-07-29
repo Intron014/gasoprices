@@ -103,8 +103,20 @@ function updateLanguage() {
 
 function initializeLanguageSelector() {
     const languageSelector = document.getElementById('language-selector');
+
+    const storedLanguage = localStorage.getItem('selectedLanguage');
+
+    if (storedLanguage) {
+        currentLanguage = storedLanguage;
+    } else {
+        localStorage.setItem('selectedLanguage', currentLanguage);
+    }
+
+    languageSelector.value = currentLanguage;
+
     languageSelector.addEventListener('change', (event) => {
         currentLanguage = event.target.value;
+        localStorage.setItem('selectedLanguage', currentLanguage);
         updateLanguage();
     });
 }
@@ -773,10 +785,10 @@ function update_date(date) {
 window.onload = async function() {
     await loadTranslations();
     loadColumnPreferences();
+    initializeLanguageSelector();
     initializeDistanceFilter();
     initializeLocationFilters();
     initializeColumnMenu();
-    initializeLanguageSelector();
     initializeDarkMode();
     darkModeToggle();
     updateDarkModeButtonText();
