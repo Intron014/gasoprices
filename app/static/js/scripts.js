@@ -24,6 +24,8 @@ const columns = [
     { key: "Tipo Venta", display: "TV", default: false }
 ];
 
+const loadingMessages = ["loading1", "loading2", "loading3"];
+
 let visibleColumns = columns.filter(col => col.default).map(col => col.key);
 let currentStations = [];
 let sortOrder = {};
@@ -32,6 +34,7 @@ let mapEmbedsEnabled = false;
 let currentLanguage = 'es';
 let translations = {}
 let isDarkMode = false;
+let messageInterval;
 
 function loadTranslations() {
     return fetch('/translations')
@@ -296,11 +299,24 @@ function updateVisibleColumns() {
 
 
 function showSpinner() {
-    document.getElementById('loading-spinner').style.display = 'flex';
+    const spinner = document.getElementById('loading-spinner');
+    const loadingText = document.getElementById('loading-text');
+    spinner.style.display = 'flex';
+    let messageIndex = 0;
+
+    loadingText.textContent = translate(loadingMessages[messageIndex]);
+
+    messageInterval = setInterval(() => {
+        messageIndex = (messageIndex + 1) % loadingMessages.length;
+        loadingText.textContent = translate(loadingMessages[messageIndex]);
+    }, 2000);
 }
 
 function hideSpinner() {
-    document.getElementById('loading-spinner').style.display = 'none';
+    const spinner = document.getElementById('loading-spinner');
+    spinner.style.display = 'none';
+
+    clearInterval(messageInterval);
 }
 
 async function fetchStations() {

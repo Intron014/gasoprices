@@ -208,5 +208,21 @@
     "en": "Light Mode",
     "es": "Modo Claro",
     "ca": "Mode Clar"
+  },
+  "loading1": {
+    "en": "Fueling up our database...",
+    "es": "Repostando la base de datos...",
+    "ca": "Repostant la base de dades..."
+  },
+  "loading2": {
+    "en": "Pumping data from the servers...",
+    "es": "Extrayendo datos de los servidores...",
+    "ca": "Extreient dades dels servidors..."
+  },
+  "loading3": {
+    "en": "Filling up the tank...",
+    "es": "Llenando el depósito...",
+    "ca": "Omplint el dipòsit..."
   }
+
 }
