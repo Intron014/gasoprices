@@ -35,6 +35,7 @@ let currentLanguage = 'es';
 let translations = {}
 let isDarkMode = false;
 let messageInterval;
+let selectedBrands;
 
 function loadTranslations() {
     return fetch('/translations')
@@ -92,11 +93,11 @@ function updateLanguage() {
         const datePart = updateDateElement.textContent.split('\n')[1];
         updateDateElement.textContent = `${translate('latestUpdate')}\n${datePart}`;
     }
-
     initializeColumnMenu();
     initializeDarkMode();
 
     if (currentStations && currentStations.length > 0) {
+        initializeBrandFilterMenu(currentStations);
         displayStations(currentStations);
     }
 }
@@ -194,6 +195,7 @@ function updatePriceStats(stations) {
 }
 
 function selectAllBrands() {
+    const brandFilterMenu = document.getElementById('brand-menu');
     const checkboxes = brandFilterMenu.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(cb => {
         cb.checked = true;
@@ -203,6 +205,7 @@ function selectAllBrands() {
 }
 
 function deselectAllBrands() {
+    const brandFilterMenu = document.getElementById('brand-menu');
     const checkboxes = brandFilterMenu.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(cb => {
         cb.checked = false;
@@ -213,16 +216,14 @@ function deselectAllBrands() {
 
 function updateBrandFilter() {
     selectedBrands = new Set(
-        Array.from(document.querySelectorAll('#brand-menu input[type="checkbox"]:checked'))
+        Array.from(brandFilterMenu.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => cb.value)
     );
-    if (currentStations && currentStations.length > 0) {
-        const filteredStations = currentStations.filter(station => selectedBrands.has(station['Rótulo']));
-        displayStations(filteredStations);
-    }
+    displayStations(currentStations);
 }
 
 function initializeBrandFilterMenu(stations) {
+
     const brandFilterMenu = document.getElementById('brand-menu');
     brandFilterMenu.innerHTML = '';
 
@@ -257,6 +258,7 @@ function initializeBrandFilterMenu(stations) {
 
     const brands = new Set(stations.map(station => station['Rótulo']));
     console.log("Brands found:", brands);
+    console.log("Current stations:", currentStations)
     selectedBrands = new Set(brands);
 
     brands.forEach(brand => {
@@ -270,6 +272,9 @@ function initializeBrandFilterMenu(stations) {
         label.appendChild(document.createTextNode(brand));
         brandFilterMenu.appendChild(label);
     });
+
+
+    // updateBrandFilterMenu(stations);
 }
 
 
@@ -416,6 +421,41 @@ function hideSpinner() {
     clearInterval(messageInterval);
 }
 
+function updateBrandFilterMenu(stations) {
+    const brandFilterMenu = document.getElementById('brand-menu');
+    const existingBrands = new Set(Array.from(brandFilterMenu.querySelectorAll('input[type="checkbox"]')).map(cb => cb.value));
+    const currentBrands = new Set(stations.map(station => station['Rótulo']));
+
+    currentBrands.forEach(brand => {
+        if (!existingBrands.has(brand)) {
+            const label = document.createElement('label');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = brand;
+            checkbox.checked = true;
+            checkbox.addEventListener('change', updateBrandFilter);
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(brand));
+            brandFilterMenu.appendChild(label);
+        }
+    });
+
+    existingBrands.forEach(brand => {
+        if (!currentBrands.has(brand)) {
+            const checkbox = brandFilterMenu.querySelector(`input[value="${brand}"]`);
+            if (checkbox) {
+                checkbox.parentElement.remove();
+            }
+        }
+    });
+
+    selectedBrands = new Set(
+        Array.from(brandFilterMenu.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => cb.value)
+    );
+}
+
+
 async function fetchStations() {
     showSpinner();
     try {
@@ -423,14 +463,15 @@ async function fetchStations() {
         const data = await response.json();
         update_date(data.Fecha);
         hideSpinner();
+        initializeBrandFilterMenu(data.ListaEESSPrecio)
         displayStations(data.ListaEESSPrecio);
-        initializeBrandFilterMenu(data.ListaEESSPrecio);
     } catch (error) {
         console.error('Error fetching stations:', error);
         hideSpinner();
         alert('Error loading gas stations. Please try again later.');
     }
 }
+
 
 function displayStations(stations) {
 
@@ -441,7 +482,7 @@ function displayStations(stations) {
     }
 
     console.log("Displaying stations:", stations.length);
-    currentStations = stations; // Update current stations
+    currentStations = stations;
     updatePriceStats(stations);
 
     const tableHead = document.getElementById('stations-table-head');
@@ -527,6 +568,11 @@ function displayStations(stations) {
         if (showOnlyOpenStations && status === translate('closed')) {
             return;
         }
+
+        console.log('Selected brand:', station['Rótulo']);
+        // if (!selectedBrands.has(station['Rótulo'])) {
+        //     return;
+        // }
 
         const row = document.createElement('tr');
         visibleColumns.forEach(columnKey => {
