@@ -209,6 +209,16 @@
     "es": "Modo Claro",
     "ca": "Mode Clar"
   },
+  "selectAll": {
+    "en": "Select All",
+    "es": "Seleccionar Todo",
+    "ca": "Seleccionar Tot"
+  },
+  "deselectAll": {
+    "en": "Deselect All",
+    "es": "Deseleccionar Todo",
+    "ca": "Deseleccionar Tot"
+  },
   "loading1": {
     "en": "Fueling up our database...",
     "es": "Repostando la base de datos...",

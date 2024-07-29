@@ -86,6 +86,7 @@ function updateLanguage() {
     document.getElementById('provincia-select').firstElementChild.textContent = translate('selectProvincia');
     document.getElementById('municipio-select').firstElementChild.textContent = translate('selectMunicipio');
     document.getElementById('search-button').textContent = translate('search');
+    document.getElementById('toggle-brand-filter').textContent = translate('brandFilter');
     document.getElementById('loading-text').textContent = translate('loadingStations');
 
 
@@ -245,8 +246,9 @@ function initializeBrandFilterMenu(stations) {
     });
     brandFilterMenu.appendChild(closeButton);
 
-    const titleLabel = document.createElement('h3');
+    const titleLabel = document.createElement('label');
     titleLabel.textContent = translate('brandFilter');
+    titleLabel.style.fontWeight = 'bold';
     brandFilterMenu.appendChild(titleLabel);
 
     const selectAllButton = document.createElement('button');
@@ -295,7 +297,7 @@ function initializeColumnMenu() {
     const menu = document.getElementById('column-menu');
     menu.innerHTML = '';
 
-    const closeButton = document.createElement('label');
+    const closeButton = document.createElement('button');
     closeButton.textContent = '✖';
     closeButton.style.cursor = 'pointer';
     closeButton.style.color = 'red';
