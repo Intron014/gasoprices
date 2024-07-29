@@ -501,10 +501,9 @@ function displayStations(stations) {
         const column = columns.find(col => col.key === columnKey);
         if(column) {
             const th = document.createElement('th');
-            console.log('Creating column:', columnKey, column.display);
             th.textContent = translate(column.display);
-            if (columnKey.startsWith('Precio')) {
-                const hasPrices = columnHasPrices(stations, columnKey);
+            if (columnKey.startsWith('Precio') || columnKey === 'Distancia') {
+                const hasPrices = columnKey === 'Distancia' || columnHasPrices(stations, columnKey);
                 if (!hasPrices) {
                     th.style.textDecoration = 'line-through';
                     th.style.color = 'gray';
@@ -514,43 +513,47 @@ function displayStations(stations) {
                         const isAscending = currentSortColumn === columnKey ? !sortOrder[columnKey] : true;
                         sortOrder = {};
                         sortOrder[columnKey] = isAscending;
-                        sortStationsByPrice(currentStations, columnKey, isAscending);
+                        if (columnKey === 'Distancia') {
+                            sortStationsByDistance(currentStations, isAscending);
+                        } else {
+                            sortStationsByPrice(currentStations, columnKey, isAscending);
+                        }
                     });
                 }
-                switch (columnKey) {
-                    case 'Precio Gasoleo A':
-                        th.classList.add('fuel-diesel');
-                        break;
-                    case 'Precio Gasoleo Premium':
-                        th.classList.add('fuel-diesel-plus');
-                        break;
-                    case 'Precio Gasolina 95 E5':
-                        th.classList.add('fuel-sp-95');
-                        break;
-                    case 'Precio Gasolina 98 E5':
-                        th.classList.add('fuel-sp-98');
-                        break;
-                    case 'Precio Biodiesel':
-                        th.classList.add('fuel-biodiesel');
-                        break;
-                    case 'Precio Bioetanol':
-                        th.classList.add('fuel-bioetanol');
-                        break;
-                    case 'Precio Gas Natural Comprimido':
-                        th.classList.add('fuel-gnc');
-                        break;
-                    case 'Precio Gas Natural Licuado':
-                        th.classList.add('fuel-gnl');
-                        break;
-                    case 'Precio Gases licuados del petróleo':
-                        th.classList.add('fuel-glp');
-                        break;
-                    case 'Precio Hidrogeno':
-                        th.classList.add('fuel-h2');
-                        break;
-                    default:
-                        console.error(`Unknown fuel type: ${columnKey}`);
-                }
+            }
+            switch (columnKey) {
+                case 'Precio Gasoleo A':
+                    th.classList.add('fuel-diesel');
+                    break;
+                case 'Precio Gasoleo Premium':
+                    th.classList.add('fuel-diesel-plus');
+                    break;
+                case 'Precio Gasolina 95 E5':
+                    th.classList.add('fuel-sp-95');
+                    break;
+                case 'Precio Gasolina 98 E5':
+                    th.classList.add('fuel-sp-98');
+                    break;
+                case 'Precio Biodiesel':
+                    th.classList.add('fuel-biodiesel');
+                    break;
+                case 'Precio Bioetanol':
+                    th.classList.add('fuel-bioetanol');
+                    break;
+                case 'Precio Gas Natural Comprimido':
+                    th.classList.add('fuel-gnc');
+                    break;
+                case 'Precio Gas Natural Licuado':
+                    th.classList.add('fuel-gnl');
+                    break;
+                case 'Precio Gases licuados del petróleo':
+                    th.classList.add('fuel-glp');
+                    break;
+                case 'Precio Hidrogeno':
+                    th.classList.add('fuel-h2');
+                    break;
+                default:
+                    console.error(`Unknown fuel type: ${columnKey}`);
             }
             headerRow.appendChild(th);
         } else {
@@ -668,6 +671,18 @@ function getStatusAndTimetable(horario) {
     }
 
     return { status, formattedTimetable };
+}
+
+function sortStationsByDistance(stations, asc) {
+    currentSortColumn = 'Distancia';
+    sortOrder['Distancia'] = asc;
+    stations.sort((a, b) => {
+        const distanceA = a.distance !== undefined ? a.distance : Infinity;
+        const distanceB = b.distance !== undefined ? b.distance : Infinity;
+        return asc ? distanceA - distanceB : distanceB - distanceA;
+    });
+    displayStations(stations);
+    updateSortIndicators();
 }
 
 function showTimetable(cell, timetable) {
