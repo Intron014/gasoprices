@@ -193,8 +193,93 @@ function updatePriceStats(stations) {
     });
 }
 
+function selectAllBrands() {
+    const checkboxes = brandFilterMenu.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.checked = true;
+        selectedBrands.add(cb.value);
+    });
+    updateBrandFilter();
+}
+
+function deselectAllBrands() {
+    const checkboxes = brandFilterMenu.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+        selectedBrands.delete(cb.value);
+    });
+    updateBrandFilter();
+}
+
+function updateBrandFilter() {
+    selectedBrands = new Set(
+        Array.from(document.querySelectorAll('#brand-menu input[type="checkbox"]:checked'))
+            .map(cb => cb.value)
+    );
+    if (currentStations && currentStations.length > 0) {
+        const filteredStations = currentStations.filter(station => selectedBrands.has(station['Rótulo']));
+        displayStations(filteredStations);
+    }
+}
+
+function initializeBrandFilterMenu(stations) {
+    const brandFilterMenu = document.getElementById('brand-menu');
+    brandFilterMenu.innerHTML = '';
+
+    const closeButton = document.createElement('label');
+    closeButton.textContent = '✖';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.color = 'red';
+    closeButton.addEventListener('click', () => {
+        brandFilterMenu.style.display = 'none';
+    });
+    brandFilterMenu.appendChild(closeButton);
+
+    const titleLabel = document.createElement('label');
+    titleLabel.textContent = translate('brandFilter');
+    titleLabel.style.fontWeight = 'bold';
+    titleLabel.style.cursor = 'default';
+    titleLabel.style.userSelect = 'none';
+    brandFilterMenu.appendChild(titleLabel);
+    brandFilterMenu.appendChild(document.createElement('hr'));
+
+    const selectAllButton = document.createElement('button');
+    selectAllButton.textContent = translate('selectAll');
+    selectAllButton.addEventListener('click', selectAllBrands);
+    brandFilterMenu.appendChild(selectAllButton);
+
+    const deselectAllButton = document.createElement('button');
+    deselectAllButton.textContent = translate('deselectAll');
+    deselectAllButton.addEventListener('click', deselectAllBrands);
+    brandFilterMenu.appendChild(deselectAllButton);
+
+    brandFilterMenu.appendChild(document.createElement('hr'));
+
+    const brands = new Set(stations.map(station => station['Rótulo']));
+    console.log("Brands found:", brands);
+    selectedBrands = new Set(brands);
+
+    brands.forEach(brand => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = brand;
+        checkbox.checked = true;
+        checkbox.addEventListener('change', updateBrandFilter);
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(brand));
+        brandFilterMenu.appendChild(label);
+    });
+}
+
+
 function toggleColumnMenu() {
     const menu = document.getElementById('column-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleBrandFilterMenu() {
+    const menu = document.getElementById('brand-menu')
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
@@ -339,6 +424,7 @@ async function fetchStations() {
         update_date(data.Fecha);
         hideSpinner();
         displayStations(data.ListaEESSPrecio);
+        initializeBrandFilterMenu(data.ListaEESSPrecio);
     } catch (error) {
         console.error('Error fetching stations:', error);
         hideSpinner();
