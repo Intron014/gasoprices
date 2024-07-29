@@ -28,6 +28,7 @@ const loadingMessages = ["loading1", "loading2", "loading3"];
 
 let visibleColumns = columns.filter(col => col.default).map(col => col.key);
 let currentStations = [];
+let allStations = [];
 let sortOrder = {};
 let currentSortColumn = null;
 let mapEmbedsEnabled = false;
@@ -35,7 +36,7 @@ let currentLanguage = 'es';
 let translations = {}
 let isDarkMode = false;
 let messageInterval;
-let selectedBrands;
+let selectedBrands = new Set();
 
 function loadTranslations() {
     return fetch('/translations')
@@ -215,19 +216,27 @@ function deselectAllBrands() {
 }
 
 function updateBrandFilter() {
+    const brandFilterMenu = document.getElementById('brand-menu');
+    const checkboxes = brandFilterMenu.querySelectorAll('input[type="checkbox"]');
+
     selectedBrands = new Set(
-        Array.from(brandFilterMenu.querySelectorAll('input[type="checkbox"]:checked'))
+        Array.from(checkboxes)
+            .filter(cb => cb.checked)
             .map(cb => cb.value)
     );
-    displayStations(currentStations);
+
+    console.log("Updated selectedBrands:", selectedBrands);
+
+    if (currentStations && currentStations.length > 0) {
+        displayStations(currentStations);
+    }
 }
 
 function initializeBrandFilterMenu(stations) {
-
     const brandFilterMenu = document.getElementById('brand-menu');
     brandFilterMenu.innerHTML = '';
 
-    const closeButton = document.createElement('label');
+    const closeButton = document.createElement('button');
     closeButton.textContent = '✖';
     closeButton.style.cursor = 'pointer';
     closeButton.style.color = 'red';
@@ -236,13 +245,9 @@ function initializeBrandFilterMenu(stations) {
     });
     brandFilterMenu.appendChild(closeButton);
 
-    const titleLabel = document.createElement('label');
+    const titleLabel = document.createElement('h3');
     titleLabel.textContent = translate('brandFilter');
-    titleLabel.style.fontWeight = 'bold';
-    titleLabel.style.cursor = 'default';
-    titleLabel.style.userSelect = 'none';
     brandFilterMenu.appendChild(titleLabel);
-    brandFilterMenu.appendChild(document.createElement('hr'));
 
     const selectAllButton = document.createElement('button');
     selectAllButton.textContent = translate('selectAll');
@@ -258,8 +263,6 @@ function initializeBrandFilterMenu(stations) {
 
     const brands = new Set(stations.map(station => station['Rótulo']));
     console.log("Brands found:", brands);
-    console.log("Current stations:", currentStations)
-    selectedBrands = new Set(brands);
 
     brands.forEach(brand => {
         const label = document.createElement('label');
@@ -273,10 +276,10 @@ function initializeBrandFilterMenu(stations) {
         brandFilterMenu.appendChild(label);
     });
 
+    selectedBrands = new Set(brands);
 
-    // updateBrandFilterMenu(stations);
+    console.log("Initial selectedBrands:", selectedBrands);
 }
-
 
 function toggleColumnMenu() {
     const menu = document.getElementById('column-menu');
@@ -284,7 +287,7 @@ function toggleColumnMenu() {
 }
 
 function toggleBrandFilterMenu() {
-    const menu = document.getElementById('brand-menu')
+    const menu = document.getElementById('brand-menu');
     menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
@@ -462,19 +465,18 @@ async function fetchStations() {
         const response = await fetch('/fuel_stations');
         const data = await response.json();
         update_date(data.Fecha);
+        allStations = data.ListaEESSPrecio;
         hideSpinner();
-        initializeBrandFilterMenu(data.ListaEESSPrecio)
-        displayStations(data.ListaEESSPrecio);
+        return allStations;
     } catch (error) {
         console.error('Error fetching stations:', error);
         hideSpinner();
         alert('Error loading gas stations. Please try again later.');
+        return [];
     }
 }
 
-
 function displayStations(stations) {
-
     if (!Array.isArray(stations)) {
         console.error('displayStations received non-array data:', stations);
         alert('Error: Received invalid data from the server.');
@@ -484,6 +486,7 @@ function displayStations(stations) {
     console.log("Displaying stations:", stations.length);
     currentStations = stations;
     updatePriceStats(stations);
+    updateBrandFilterMenu(stations);
 
     const tableHead = document.getElementById('stations-table-head');
     const tableBody = document.getElementById('stations-table-body');
@@ -503,6 +506,42 @@ function displayStations(stations) {
             const th = document.createElement('th');
             th.textContent = translate(column.display);
             if (columnKey.startsWith('Precio') || columnKey === 'Distancia') {
+                if (columnKey.startsWith('Precio')) {
+                    switch (columnKey) {
+                        case 'Precio Gasoleo A':
+                            th.classList.add('fuel-diesel');
+                            break;
+                        case 'Precio Gasoleo Premium':
+                            th.classList.add('fuel-diesel-plus');
+                            break;
+                        case 'Precio Gasolina 95 E5':
+                            th.classList.add('fuel-sp-95');
+                            break;
+                        case 'Precio Gasolina 98 E5':
+                            th.classList.add('fuel-sp-98');
+                            break;
+                        case 'Precio Biodiesel':
+                            th.classList.add('fuel-biodiesel');
+                            break;
+                        case 'Precio Bioetanol':
+                            th.classList.add('fuel-bioetanol');
+                            break;
+                        case 'Precio Gas Natural Comprimido':
+                            th.classList.add('fuel-gnc');
+                            break;
+                        case 'Precio Gas Natural Licuado':
+                            th.classList.add('fuel-gnl');
+                            break;
+                        case 'Precio Gases licuados del petróleo':
+                            th.classList.add('fuel-glp');
+                            break;
+                        case 'Precio Hidrogeno':
+                            th.classList.add('fuel-h2');
+                            break;
+                        default:
+                            console.error(`Unknown fuel type: ${columnKey}`);
+                    }
+                }
                 const hasPrices = columnKey === 'Distancia' || columnHasPrices(stations, columnKey);
                 if (!hasPrices) {
                     th.style.textDecoration = 'line-through';
@@ -521,40 +560,6 @@ function displayStations(stations) {
                     });
                 }
             }
-            switch (columnKey) {
-                case 'Precio Gasoleo A':
-                    th.classList.add('fuel-diesel');
-                    break;
-                case 'Precio Gasoleo Premium':
-                    th.classList.add('fuel-diesel-plus');
-                    break;
-                case 'Precio Gasolina 95 E5':
-                    th.classList.add('fuel-sp-95');
-                    break;
-                case 'Precio Gasolina 98 E5':
-                    th.classList.add('fuel-sp-98');
-                    break;
-                case 'Precio Biodiesel':
-                    th.classList.add('fuel-biodiesel');
-                    break;
-                case 'Precio Bioetanol':
-                    th.classList.add('fuel-bioetanol');
-                    break;
-                case 'Precio Gas Natural Comprimido':
-                    th.classList.add('fuel-gnc');
-                    break;
-                case 'Precio Gas Natural Licuado':
-                    th.classList.add('fuel-gnl');
-                    break;
-                case 'Precio Gases licuados del petróleo':
-                    th.classList.add('fuel-glp');
-                    break;
-                case 'Precio Hidrogeno':
-                    th.classList.add('fuel-h2');
-                    break;
-                default:
-                    console.error(`Unknown fuel type: ${columnKey}`);
-            }
             headerRow.appendChild(th);
         } else {
             console.error(`Column not found for key: ${columnKey}`);
@@ -564,18 +569,16 @@ function displayStations(stations) {
 
     // Create table body
     stations.forEach((station, index) => {
-
-        const { status, formattedTimetable} = getStatusAndTimetable(station['Horario']);
+        const { status, formattedTimetable } = getStatusAndTimetable(station['Horario']);
         const showOnlyOpenStations = document.getElementById('open-close-checkbox').checked;
 
         if (showOnlyOpenStations && status === translate('closed')) {
             return;
         }
 
-        console.log('Selected brand:', station['Rótulo']);
-        // if (!selectedBrands.has(station['Rótulo'])) {
-        //     return;
-        // }
+        if (!selectedBrands.has(station['Rótulo'])) {
+            return;
+        }
 
         const row = document.createElement('tr');
         visibleColumns.forEach(columnKey => {
@@ -843,27 +846,30 @@ async function filterStationsByDistance(maxDistance) {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
-            const response = await fetch('/fuel_stations');
-            const data = await response.json();
-            update_date(data.Fecha);
-            const stations = data.ListaEESSPrecio.map(station => {
+            const stations = allStations.map(station => {
                 const stationLat = parseFloat(station.Latitud.replace(',', '.'));
                 const stationLon = parseFloat(station["Longitud (WGS84)"].replace(',', '.'));
                 const distance = getDistance(latitude, longitude, stationLat, stationLon);
                 return { ...station, distance };
             }).filter(station => station.distance <= maxDistance);
             hideSpinner();
-            displayStations(stations.sort((a, b) => a.distance - b.distance));
+            currentStations = stations.sort((a, b) => a.distance - b.distance);
+            initializeBrandFilterMenu(currentStations);
+            displayStations(currentStations);
         }, (error) => {
             console.error("Error getting location:", error);
             hideSpinner();
             alert("Unable to get your location. Please check your browser settings.");
-            fetchStations();
+            currentStations = allStations;
+            initializeBrandFilterMenu(currentStations);
+            displayStations(currentStations);
         });
     } else {
         hideSpinner();
         alert('Geolocation is not supported by this browser.');
-        fetchStations();
+        currentStations = allStations;
+        initializeBrandFilterMenu(currentStations);
+        displayStations(currentStations);
     }
 }
 
@@ -883,13 +889,9 @@ function initializeDistanceFilter() {
 
     if (distanceInput && filterButton) {
         distanceInput.value = '4';
-
         filterButton.addEventListener('click', handleFilterByDistance);
-
-        filterStationsByDistance(4);
     } else {
         console.error('Distance filter elements not found');
-        fetchStations();
     }
 }
 
@@ -943,5 +945,7 @@ window.onload = async function() {
     darkModeToggle();
     updateDarkModeButtonText();
     updateLanguage();
-};
 
+    allStations = await fetchStations();
+    await filterStationsByDistance(4);
+};
