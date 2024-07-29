@@ -31,6 +31,7 @@ let currentSortColumn = null;
 let mapEmbedsEnabled = false;
 let currentLanguage = 'es';
 let translations = {}
+let isDarkMode = false;
 
 function loadTranslations() {
     return fetch('/translations')
@@ -46,16 +47,9 @@ function translate(key) {
 }
 
 function initializeDarkMode() {
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
     const body = document.body;
-
-    if (localStorage.getItem('darkMode') === 'true') {
-        body.classList.add('dark-mode');
-        darkModeToggle.textContent = translate('lightMode');
-    } else {
-        body.classList.remove('dark-mode');
-        darkModeToggle.textContent = translate('darkMode');
-    }
+    isDarkMode = localStorage.getItem('darkMode') === 'true';
+    body.classList.toggle('dark-mode', isDarkMode);
 }
 
 function darkModeToggle() {
@@ -63,13 +57,15 @@ function darkModeToggle() {
     const body = document.body;
 
     darkModeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark-mode');
-        const isDarkMode = body.classList.contains('dark-mode');
+        isDarkMode = !isDarkMode;
+        body.classList.toggle('dark-mode', isDarkMode);
         localStorage.setItem('darkMode', isDarkMode);
-        darkModeToggle.textContent = translate(isDarkMode ? 'lightMode' : 'darkMode');
+        updateDarkModeButtonText();
     });
+}
 
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+function updateDarkModeButtonText() {
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
     darkModeToggle.textContent = translate(isDarkMode ? 'lightMode' : 'darkMode');
 }
 
@@ -766,6 +762,8 @@ window.onload = async function() {
     initializeColumnMenu();
     initializeLanguageSelector();
     initializeDarkMode();
+    darkModeToggle();
+    updateDarkModeButtonText();
     updateLanguage();
 };
 
