@@ -843,10 +843,21 @@ function sortStationsByPrice(stations, priceType, asc) {
     updateSortIndicators();
 }
 
-async function filterStationsByDistance(maxDistance) {
+function filterStationsByDistance(maxDistance) {
     showSpinner();
+    let timeoutReached = false;
+
+    const timeout = setTimeout(() => {
+        timeoutReached = true;
+        hideSpinner();
+        displayStations(allStations);
+    }, 5000);
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
+            if (timeoutReached) return;
+            clearTimeout(timeout);
+
             const { latitude, longitude } = position.coords;
             const stations = allStations.map(station => {
                 const stationLat = parseFloat(station.Latitud.replace(',', '.'));
@@ -854,11 +865,15 @@ async function filterStationsByDistance(maxDistance) {
                 const distance = getDistance(latitude, longitude, stationLat, stationLon);
                 return { ...station, distance };
             }).filter(station => station.distance <= maxDistance);
+
             hideSpinner();
             currentStations = stations.sort((a, b) => a.distance - b.distance);
             initializeBrandFilterMenu(currentStations);
             displayStations(currentStations);
         }, (error) => {
+            if (timeoutReached) return;
+            clearTimeout(timeout);
+
             console.error("Error getting location:", error);
             hideSpinner();
             alert("Unable to get your location. Please check your browser settings.");
@@ -867,6 +882,9 @@ async function filterStationsByDistance(maxDistance) {
             displayStations(currentStations);
         });
     } else {
+        if (timeoutReached) return;
+        clearTimeout(timeout);
+
         hideSpinner();
         alert('Geolocation is not supported by this browser.');
         currentStations = allStations;
@@ -938,6 +956,7 @@ function update_date(date) {
 
 window.onload = async function() {
     await loadTranslations();
+    allStations = await fetchStations();
     loadColumnPreferences();
     initializeLanguageSelector();
     initializeDistanceFilter();
@@ -947,7 +966,5 @@ window.onload = async function() {
     darkModeToggle();
     updateDarkModeButtonText();
     updateLanguage();
-
-    allStations = await fetchStations();
     await filterStationsByDistance(4);
 };
