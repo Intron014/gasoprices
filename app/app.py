@@ -4,6 +4,7 @@ import logging
 from datetime import datetime, timedelta
 import json
 import os
+from requests.exceptions import Timeout, RequestException
 
 app = Flask(__name__)
 if __name__ != '__main__':
@@ -31,16 +32,24 @@ def fetch_and_cache_data():
     global last_fetch_time, cached_data
 
     url = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
-    response = requests.get(url)
-    app.logger.info(f"Fetching data from API: {response.content}")
-    data = response.json()
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        data = response.json()
 
-    with open(CACHE_FILE, 'w') as cache_file:
-        json.dump(data, cache_file)
+        with open(CACHE_FILE, 'w') as cache_file:
+            json.dump(data, cache_file)
 
-    last_fetch_time = datetime.now()
-    cached_data = data
-    return data
+        last_fetch_time = datetime.now()
+        cached_data = data
+        app.logger.info("Successfully fetched and cached new data")
+        return data
+    except Timeout:
+        app.logger.error("Timeout occurred while fetching data from API")
+        return get_cached_data()
+    except RequestException as e:
+        app.logger.error(f"Error occurred while fetching data from API: {str(e)}")
+        return get_cached_data()
 
 def get_cached_data():
     global cached_data
@@ -48,19 +57,26 @@ def get_cached_data():
         if os.path.exists(CACHE_FILE):
             with open(CACHE_FILE, 'r') as cache_file:
                 cached_data = json.load(cache_file)
+            app.logger.info("Loaded data from cache file")
         else:
+            app.logger.warning("No cache file found, attempting to fetch data")
             cached_data = fetch_and_cache_data()
     return cached_data
 
 @app.route('/fuel_stations', methods=['GET'])
 def get_fuel_stations():
     app.logger.info("OS requesting: " + request.headers.get('User-Agent'))
-    if should_fetch_data():
-        app.logger.info("Fetching new data from API")
-        return jsonify(fetch_and_cache_data())
-    else:
-        app.logger.info("Returning cached data")
-        return jsonify(get_cached_data())
+    try:
+        if should_fetch_data():
+            app.logger.info("Fetching new data from API")
+            data = fetch_and_cache_data()
+        else:
+            app.logger.info("Returning cached data")
+            data = get_cached_data()
+        return jsonify(data)
+    except Exception as e:
+        app.logger.error(f"Unexpected error in get_fuel_stations: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred"}), 500
 
 
 
