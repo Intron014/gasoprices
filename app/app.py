@@ -26,7 +26,7 @@ def should_fetch_data():
     time_diff = current_time - last_fetch_time
     minutes_passed = time_diff.total_seconds() / 60
 
-    return (current_time.minute % 30 == 0 and minutes_passed >= 1) or minutes_passed >= 30
+    return minutes_passed >= 1400
 
 def fetch_and_cache_data():
     global last_fetch_time, cached_data
