@@ -1,3 +1,3 @@
 timeout = 120
-workers = 4
+workers = 1
 worker_class = 'gevent'
