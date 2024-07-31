@@ -32,6 +32,7 @@ def fetch_and_cache_data():
 
     url = "https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/"
     response = requests.get(url)
+    logging.info(f"Fetching data from API: {response.content}")
     data = response.json()
 
     with open(CACHE_FILE, 'w') as cache_file:
